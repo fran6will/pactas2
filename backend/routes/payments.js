@@ -8,17 +8,14 @@ const authenticateUser = require('../middleware/authenticateUser');
 const prisma = new PrismaClient();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
-const path = require('path');
+// backend/routes/payments.js
 router.get('/success', (req, res) => {
-  // Gérer le cas où le paiement a réussi
-  res.sendFile(path.join(__dirname, '../views', 'success.html'));
+  res.redirect(`${process.env.FRONTEND_URL}/success`);
 });
 
 router.get('/cancel', (req, res) => {
-  // Gérer le cas où le paiement a été annulé
-  res.sendFile(path.join(__dirname, '../views', 'cancel.html'));
+  res.redirect(`${process.env.FRONTEND_URL}/cancel`);
 });
-
 router.post('/create-pack-payment-session', authenticateUser, async (req, res) => {
     try {
       const { packId } = req.body;
