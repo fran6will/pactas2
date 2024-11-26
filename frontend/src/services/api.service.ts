@@ -1,7 +1,7 @@
 // src/services/api.service.ts
 const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://pactas2.onrender.com/api'  
-  : 'https://pactas2.onrender.com//api';            
+  ? 'https://pactas2.onrender.comapi'  
+  : 'https://pactas2.onrender.com/api';            
 
 export const api = {
   getToken() {

@@ -1,7 +1,7 @@
 // src/services/questions.service.ts
 import { authService } from './auth.service';
 
-const API_URL = 'https://pactas2.onrender.com//api';
+const API_URL = 'https://pactas2.onrender.com/api';
 
 export const questionsService = {
   // Récupérer toutes les questions
