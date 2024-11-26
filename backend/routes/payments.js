@@ -55,7 +55,7 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
           quantity: 1,
         }],
         mode: 'payment',
-        success_url: `${process.env.FRONTEND_URL}/pack-success`,
+        success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.FRONTEND_URL}/cancel`,
         client_reference_id: req.user.id, // ID de l'utilisateur
         metadata: {
