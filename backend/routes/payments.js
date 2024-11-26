@@ -114,8 +114,8 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:5173/success',
-      cancel_url: 'http://localhost:5173/cancel',
+      success_url: 'https://pactas2.onrender.com/success',
+      cancel_url: 'https://pactas2.onrender.com/cancel',
       client_reference_id: req.user.id, // Pour identifier l'utilisateur
     });
 

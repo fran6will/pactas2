@@ -35,7 +35,7 @@ function AppRoutes() {
       <Route path="/organizations/:id" element={<OrganizationPublicPage />} />
       <Route path="/success" element={<PaymentSuccessPage />} />
       <Route path="/cancel" element={<PaymentCancelPage />} />
-      <Route path="/purchase" element={<PurchasePage />} /> {/* Nouvelle route pour la page d'achat */}
+      <Route path="/purchase" element={<PurchasePage />} /> 
       <Route path="/pack-success" element={<PackSuccessPage />} />
       <Route path="/organizations" element={<OrganizationsPage />} />
       <Route path="/how-it-works" element={<HowItWorksPage />} />
