@@ -33,13 +33,33 @@ function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/question/:id" element={<QuestionPage />} />
       <Route path="/organizations/:id" element={<OrganizationPublicPage />} />
-      <Route path="/success" element={<PaymentSuccessPage />} />
-      <Route path="/cancel" element={<PaymentCancelPage />} />
       <Route path="/purchase" element={<PurchasePage />} /> 
-      <Route path="/pack-success" element={<PackSuccessPage />} />
       <Route path="/organizations" element={<OrganizationsPage />} />
       <Route path="/how-it-works" element={<HowItWorksPage />} />
- 
+      <Route 
+  path="/success" 
+  element={
+    <ProtectedRoute>
+      <PaymentSuccessPage />
+    </ProtectedRoute>
+  } 
+/>
+<Route 
+  path="/pack-success" 
+  element={
+    <ProtectedRoute>
+      <PackSuccessPage />
+    </ProtectedRoute>
+  } 
+/>
+<Route 
+  path="/cancel" 
+  element={
+    <ProtectedRoute>
+      <PaymentCancelPage />
+    </ProtectedRoute>
+  } 
+/>
       {/* Routes protégées */}
       <Route
         path="/dashboard"
@@ -100,17 +120,17 @@ function AppRoutes() {
 
 function App() {
   return (
-    <UserProvider>
-      <div className="min-h-screen bg-gray-50">
-        <Router>
+    <Router>
+      <UserProvider>
+        <div className="min-h-screen bg-gray-50">
           <Layout>
             <div className="container mx-auto px-4">
               <AppRoutes />
             </div>
           </Layout>
-        </Router>
-      </div>
-    </UserProvider>
+        </div>
+      </UserProvider>
+    </Router>
   );
 }
 
