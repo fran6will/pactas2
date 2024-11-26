@@ -19,6 +19,7 @@ import PurchasePage from './pages/PurchasePage'; // Nouvelle page de paiement
 import PackSuccessPage from './pages/PackSuccessPage';
 import OrganizationsPage from './pages/OrganizationsPage';
 import HowItWorksPage from './pages/HowItWorks';
+import TokenSuccessPage from './pages/TokenSuccessPage';
 function AppRoutes() {
   const { user, isLoading } = useUser();
 
