@@ -4,9 +4,7 @@
     "install-server": "cd server && npm install",
     "build-client": "cd client && npm run build-safe",
     "build-server": "cd server && npm install",
-    "start": "cd server && npm start",
-    
-
+    "start": "cd server && npm start"
   },
   "name": "pacta-main",
   "version": "1.0.0",
