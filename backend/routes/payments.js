@@ -9,6 +9,11 @@ const prisma = new PrismaClient();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
 // backend/routes/payments.js
+
+
+app.use(express.raw({ type: 'application/json' })); // Avant vos routes
+
+
 router.get('/success', (req, res) => {
   console.log('Redirecting to:', `${process.env.FRONTEND_URL}/success`);
   res.redirect(`${process.env.FRONTEND_URL}/success`);
