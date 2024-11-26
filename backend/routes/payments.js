@@ -119,8 +119,9 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'https://pactas2.onrender.com/success',
-      cancel_url: 'https://pactas2.onrender.com/cancel',
+      success_url: `${process.env.FRONTEND_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+
       client_reference_id: req.user.id, // Pour identifier l'utilisateur
     });
 
