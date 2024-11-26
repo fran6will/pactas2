@@ -17,6 +17,8 @@ const paymentsRouter = require('./routes/payments');
 const authenticateUser = require('./middleware/authenticateUser');
 const withdrawalRoutes = require('./routes/withdrawals');
 const app = express();
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+
 const userRoutes = require('./routes/users');
 
 const prisma = new PrismaClient();
@@ -35,7 +37,6 @@ const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.SECRET_KEY;
 
 // Configurer le raw parser pour le webhook Stripe
-app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 // Configurer le JSON parser pour toutes les autres routes
 app.use(express.json());

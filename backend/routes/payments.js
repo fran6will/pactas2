@@ -182,23 +182,24 @@ router.get('/check-session/:sessionId', authenticateUser, async (req, res) => {
 // backend/routes/payments.js
 
 router.post('/webhook', async (req, res) => {
+  const payload = req.body;
   const sig = req.headers['stripe-signature'];
-  let event;
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET.trim();
 
   try {
-      console.log('Received webhook request:', {
-          headers: req.headers,
-          signatureHeader: sig,
-          bodyPresent: !!req.body
-      });
+    console.log('Webhook Processing:', {
+      sigExists: !!sig,
+      payloadExists: !!payload,
+      secretLength: endpointSecret.length
+    });
 
-      event = stripe.webhooks.constructEvent(
-          req.body,
-          sig,
-          process.env.STRIPE_WEBHOOK_SECRET
-      );
+    const event = stripe.webhooks.constructEvent(
+      payload,
+      sig,
+      endpointSecret
+    );
 
-      console.log('Webhook event constructed successfully:', event.type);
+    console.log('Webhook event constructed successfully:', event.type)
 
       if (event.type === 'checkout.session.completed') {
           const session = event.data.object;
@@ -265,16 +266,16 @@ router.post('/webhook', async (req, res) => {
 
       res.json({ received: true, type: event.type });
       
-  } catch (err) {
-      console.error('Webhook error:', {
-          message: err.message,
-          stack: err.stack,
-          body: req.body
+    } catch (err) {
+      console.error('Webhook error details:', {
+        error: err.message,
+        sigHeader: sig?.substring(0, 20) + '...',
+        secretPrefix: endpointSecret?.substring(0, 5) + '...'
       });
       
       return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-});
+    }
+  });
 // Fonction pour mettre à jour les tokens de l'utilisateur
 async function updateUserTokens(session) {
   const userId = session.client_reference_id;
