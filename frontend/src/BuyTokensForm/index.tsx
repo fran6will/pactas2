@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../context/UserContext';
 import { CreditCard, Plus, Minus, Loader } from 'lucide-react';
-import { api } from '../../services/api.service';
+import { api } from '../services/api.service';
 
 const BuyTokensForm = () => {
   const [amount, setAmount] = useState(20);
