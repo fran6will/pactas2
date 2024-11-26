@@ -8,20 +8,15 @@ const authenticateUser = require('../middleware/authenticateUser');
 const prisma = new PrismaClient();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
-const SuccessPage = require('../../frontend/src/pages/PaymentSuccessPage').default;
-const CancelPage = require('../../frontend/src/pages/PaymentCancelPage').default;
-const ReactDOMServer = require('react-dom/server');
-r
-outer.get('/success', (req, res) => {
+const path = require('path');
+router.get('/success', (req, res) => {
   // Gérer le cas où le paiement a réussi
-  const html = ReactDOMServer.renderToString(<SuccessPage />);
-  res.send(html);
+  res.sendFile(path.join(__dirname, '../views', 'success.html'));
 });
 
 router.get('/cancel', (req, res) => {
   // Gérer le cas où le paiement a été annulé
-  const html = ReactDOMServer.renderToString(<CancelPage />);
-  res.send(html);
+  res.sendFile(path.join(__dirname, '../views', 'cancel.html'));
 });
 
 router.post('/create-pack-payment-session', authenticateUser, async (req, res) => {
