@@ -1,14 +1,13 @@
 {
+  "name": "pacta-main",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
     "install-client": "cd client && npm install",
     "install-server": "cd server && npm install",
-    "build-client": "cd client && npm run build-safe",
-    "build-server": "cd server && npm install",
+    "build": "cd client && npm run build", 
     "start": "cd server && npm start"
   },
-  "name": "pacta-main",
-  "version": "1.0.0",
-  "main": "index.js",
   "keywords": [],
   "author": "",
   "license": "ISC",
