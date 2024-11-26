@@ -1,16 +1,21 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { CheckCircle } from 'lucide-react';
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
   const { refreshUser } = useUser();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    if (sessionId) {
+      console.log('Payment session ID:', sessionId);
+    }
     // Rafraîchir les données de l'utilisateur après le paiement
     refreshUser();
-  }, [refreshUser]);
+  }, [refreshUser, sessionId]);
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
