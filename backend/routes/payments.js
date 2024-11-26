@@ -177,92 +177,110 @@ router.get('/check-session/:sessionId', authenticateUser, async (req, res) => {
 
 // backend/routes/payments.js
 
+// Update the webhook route handler
 router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
+  // Ensure we have a raw body for Stripe
+  if (req.body.raw) {
+      req.body = req.body.raw;
+  }
   
-    try {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+      // Log the received data for debugging
+      console.log('Received webhook request:', {
+          headers: req.headers,
+          signatureHeader: sig,
+          bodyPresent: !!req.body
+      });
+
       event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET
+          req.body,
+          sig,
+          process.env.STRIPE_WEBHOOK_SECRET
       );
-  
-      console.log('Webhook received:', event.type);
-  
+
+      console.log('Webhook event constructed successfully:', event.type);
+
+      // Handle the checkout.session.completed event
       if (event.type === 'checkout.session.completed') {
-        const session = event.data.object;
-        
-        console.log('Session complete:', {
-          metadata: session.metadata,
-          organizationId: session.metadata?.organizationId
-        });
-  
-        if (session.metadata?.type === 'question_pack') {
-          try {
-            // Vérifier que l'organisation existe et récupérer son ID
-            const user = await prisma.user.findUnique({
-              where: { id: session.client_reference_id },
-              include: {
-                organization: true
+          const session = event.data.object;
+          
+          console.log('Processing completed session:', {
+              metadata: session.metadata,
+              clientReferenceId: session.client_reference_id
+          });
+
+          if (session.metadata?.type === 'question_pack') {
+              try {
+                  // Get user and organization
+                  const user = await prisma.user.findUnique({
+                      where: { id: session.client_reference_id },
+                      include: { organization: true }
+                  });
+
+                  if (!user) {
+                      throw new Error(`User not found: ${session.client_reference_id}`);
+                  }
+
+                  // Create organization if it doesn't exist
+                  let organizationId = user.organization?.id;
+                  if (!organizationId) {
+                      const newOrg = await prisma.organization.create({
+                          data: {
+                              userId: user.id,
+                              availableQuestions: 0,
+                              totalQuestionsPurchased: 0
+                          }
+                      });
+                      organizationId = newOrg.id;
+                      console.log('Created new organization:', organizationId);
+                  }
+
+                  const questionsToAdd = parseInt(session.metadata.questions);
+
+                  // Update organization and create transaction
+                  const result = await prisma.$transaction([
+                      prisma.organization.update({
+                          where: { id: organizationId },
+                          data: {
+                              availableQuestions: { increment: questionsToAdd },
+                              totalQuestionsPurchased: { increment: questionsToAdd }
+                          }
+                      }),
+                      prisma.transaction.create({
+                          data: {
+                              amount: session.amount_total / 100,
+                              type: 'question_pack_purchase',
+                              orgId: organizationId
+                          }
+                      })
+                  ]);
+
+                  console.log('Transaction completed successfully:', result);
+              } catch (error) {
+                  console.error('Error processing question pack:', error);
+                  // Don't throw here - we still want to return 200 to Stripe
+                  // but log the error for debugging
               }
-            });
-  
-            if (!user?.organization?.id) {
-              console.error('Organization not found for user:', session.client_reference_id);
-              return res.status(400).json({ error: 'Organization not found' });
-            }
-  
-            const organizationId = user.organization.id;
-            const questionsToAdd = parseInt(session.metadata.questions);
-  
-            console.log('Updating organization:', {
-              organizationId,
-              questionsToAdd
-            });
-  
-            const result = await prisma.$transaction(async (tx) => {
-                // Mettre à jour l'organisation
-                const updatedOrg = await tx.organization.update({
-                  where: { 
-                    id: organizationId
-                  },
-                  data: {
-                    availableQuestions: {
-                      increment: questionsToAdd
-                    },
-                    totalQuestionsPurchased: {
-                      increment: questionsToAdd
-                    }
-                  }
-                });
-              
-                // Créer la transaction avec le bon champ orgId
-                const transaction = await tx.transaction.create({
-                  data: {
-                    amount: session.amount_total / 100,
-                    type: 'question_pack_purchase',
-                    orgId: organizationId,  // Utiliser orgId directement
-                    // pas besoin de metadata car ce n'est pas dans votre modèle
-                  }
-                });
-              
-                return { updatedOrg, transaction };
-              });
-  
-            console.log('Update successful:', result);
-          } catch (error) {
-            console.error('Error processing question pack purchase:', error);
           }
-        }
       }
-  
-      res.json({ received: true });
-    } catch (err) {
-      console.error('Webhook error:', err.message);
-      res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-  });
+
+      // Send successful response to Stripe
+      res.json({ received: true, type: event.type });
+      
+  } catch (err) {
+      console.error('Webhook error:', {
+          message: err.message,
+          stack: err.stack,
+          body: req.body
+      });
+      
+      // Return a 400 error to Stripe so they retry the webhook
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
 // Fonction pour mettre à jour les tokens de l'utilisateur
 async function updateUserTokens(session) {
   const userId = session.client_reference_id;
