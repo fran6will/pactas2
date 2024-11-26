@@ -36,11 +36,29 @@ function AppRoutes() {
       <Route path="/purchase" element={<PurchasePage />} /> 
       <Route path="/organizations" element={<OrganizationsPage />} />
       <Route path="/how-it-works" element={<HowItWorksPage />} />
+      
       <Route 
   path="/success" 
   element={
+    <Navigate 
+      to={location => {
+        const searchParams = new URLSearchParams(location.search);
+        const sessionId = searchParams.get('session_id');
+        return {
+          pathname: "/token-success",
+          search: sessionId ? `?session_id=${sessionId}` : ""
+        };
+      }} 
+      replace 
+    />
+  } 
+/>
+      
+      <Route 
+  path="/token-success" 
+  element={
     <ProtectedRoute>
-      <PaymentSuccessPage />
+      <TokenSuccessPage />
     </ProtectedRoute>
   } 
 />
