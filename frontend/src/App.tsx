@@ -12,7 +12,7 @@ import QuestionPage from './pages/QuestionPage';
 import OrganizationDashboard from './pages/OrganizationDashboard';
 import OrganizationPublicPage from './pages/OrganizationPublicPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
-import PaymentCancelPage from './pages/PaymentCancelPage';
+import PaymentCancelPage from './pages/CancelPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
 import AdminPage from './pages/AdminPage';
 import PurchasePage from './pages/PurchasePage'; // Nouvelle page de paiement
