@@ -1,6 +1,6 @@
 // src/components/stats/Stats.tsx
 import { Award, BarChart3, TrendingUp } from 'lucide-react';
-import BuyTokensForm from '../BuyTokensForm';  // Corrigé l'import
+import BuyTokensForm from '../../BuyTokensForm';  // Corrigé l'import
 
 interface StatsProps {
   user: any;
