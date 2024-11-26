@@ -24,10 +24,9 @@ export default defineConfig({
     sourcemap: true
   },
   server: {
-    historyApiFallback: {
-      disableDotRule: true
-    }
+    historyApiFallback: true,
   },
+
   preview: {
     port: 5173,
     strictPort: true,
