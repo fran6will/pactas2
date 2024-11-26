@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    .container { padding: 20px; font-family: Arial, sans-serif; }
+    .header { color: #2563eb; font-size: 24px; margin-bottom: 20px; }
+    .content { color: #374151; line-height: 1.6; }
+    .result {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 15px;
+      background-color: #e5e7eb;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      Question résolue
+    </div>
+    <div class="content">
+      <p>La question suivante a été résolue :</p>
+      <p><strong>{{questionTitle}}</strong></p>
+      <p>Résultat : <span class="result">{{result}}</span></p>
+      <p>Vous pouvez consulter les détails en cliquant sur le lien ci-dessous :</p>
+      <a href="{{questionUrl}}" class="button">
+        Voir les détails
+      </a>
+    </div>
+  </div>
+</body>
+</html>

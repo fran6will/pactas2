@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    .container { 
+      padding: 20px; 
+      font-family: Arial, sans-serif; 
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header { 
+      color: #2563eb; 
+      font-size: 24px; 
+      margin-bottom: 20px; 
+    }
+    .content { 
+      color: #374151; 
+      line-height: 1.6; 
+    }
+    .bet-info {
+      background-color: #f3f4f6;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .result {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px 0;
+      text-align: center;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    .win {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    .loss {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      Résultat de votre pari
+    </div>
+
+    <div class="content">
+  <p>Bonjour {{userName}},</p>
+  
+  <p>La question "{{questionTitle}}" a été résolue !</p>
+  
+  <div class="bet-info">
+    <p><strong>Votre pari :</strong> {{betAmount}}€ sur {{prediction}}</p>
+    <p><strong>Résultat :</strong> {{actualResult}}</p>
+  </div>
+
+  <div class="result {{#if hasWon}}win{{else}}loss{{/if}}">
+    {{#if hasWon}}
+      Félicitations ! Vous avez gagné !
+    {{else}}
+      Dommage ! Ce n'est pas pour cette fois.
+    {{/if}}
+  </div>
+
+  <p>Vous pouvez consulter les détails complets en cliquant sur le lien ci-dessous :</p>
+  
+  <a href="{{questionUrl}}" class="button">
+    Voir les détails
+  </a>
+
+  <p style="margin-top: 30px;">
+    Bonne chance pour vos prochains paris !<br>
+    L'équipe PrédictSocial
+  </p>
+</div>
+  </div>
+</body>
+</html>

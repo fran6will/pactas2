@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: 79 70 229; /* indigo-600 */
+    --background: 248 250 252; /* slate-50 */
+    --text: 30 41 59; /* slate-800 */
+  }
+
+  html {
+    @apply h-full;
+  }
+
+  body {
+    @apply min-h-full bg-slate-50 ;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    margin: 0;
+    padding: 0;
+  }
+
+  #root {
+    @apply min-h-screen flex flex-col;
+  }
+
+  main {
+    @apply flex-grow;
+  }
+
+  /* Style pour les liens normaux */
+  a {
+    @apply text-indigo-600 ;
+  }
+
+ /* Correction des styles de titre pour plus de contraste */
+ h1, h2, h3, h4, h5, h6 {
+  @apply text-slate-900 ;
+  line-height: 1.2;
+}
+
+h1 {
+  @apply text-3xl md:text-4xl mb-6;
+}
+
+h2 {
+  @apply text-2xl md:text-3xl mb-4;
+}
+
+h3 {
+  @apply text-xl md:text-2xl mb-3;
+}
+
+/* Style pour les sous-titres et textes descriptifs */
+.subtitle {
+  @apply text-slate-700  text-lg;
+}
+
+
+  /* Style spécifique pour les titres des questions */
+  .question-title, h1, h2, h3, h4, h5, h6 {
+    @apply text-slate-900 ;
+  }
+
+  /* Style spécifique pour le titre principal "Prédictions" */
+  .site-title {
+    @apply text-indigo-600 ;
+  }
+
+  /* Style pour les sous-titres et textes descriptifs */
+  .subtitle {
+    @apply text-slate-700 ;
+  }
+}
+
+@layer components {
+  /* Stylez spécifique pour les cartes de question */
+  .question-card {
+    @apply bg-white 
+            overflow-hidden hover:shadow-lg transition-all;
+  }
+
+  .question-card-title {
+    @apply text-slate-900  text-lg font-semibold hover:text-indigo-600 
+            transition-colors;
+  }
+
+  .question-card-org {
+    @apply text-indigo-600  text-sm font-medium;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex 
+           items-center justify-center;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-600 text-white hover:bg-indigo-700 
+           ;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-slate-700 border border-slate-200 hover:bg-slate-50
+           ;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 rounded-lg border border-slate-200 
+           bg-white 
+           focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none;
+           
+  }
+
+  .navbar {
+    @apply bg-white  border-b border-slate-200 ;
+  }
+
+  .navbar-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between;
+  }
+
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+  }
+}
+
+@layer utilities {
+  .grid-cards {
+    @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  @keyframes bounce-once {
+    0%, 100% { 
+      transform: translateY(0);
+    }
+    50% { 
+      transform: translateY(-25px);
+    }
+  }
+  
+  .animate-bounce-once {
+    animation: bounce-once 1s cubic-bezier(0.8, 0, 1, 1);
+  }
+
+}

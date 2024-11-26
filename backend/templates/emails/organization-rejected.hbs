@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .container {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background-color: #FEE2E2;
+      color: #DC2626;
+      padding: 16px 24px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-icon {
+      width: 20px;
+      height: 20px;
+    }
+    .content {
+      padding: 24px;
+    }
+    .reason-box {
+      background-color: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+    }
+    .reason-label {
+      color: #6B7280;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .reason-text {
+      color: #111827;
+      white-space: pre-wrap;
+    }
+    .support-info {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #E5E7EB;
+      font-size: 14px;
+      color: #6B7280;
+    }
+    .footer {
+      padding: 16px 24px;
+      background-color: #F9FAFB;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      text-align: right;
+    }
+    .contact-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #EFF6FF;
+      color: #2563EB;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <svg class="header-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      <h2 class="text-lg font-medium">Demande d'organisation non approuvée</h2>
+    </div>
+
+    <div class="content">
+      <p>Cher(e) {{organizationName}},</p>
+
+      <p>Nous vous informons que votre demande d'inscription en tant qu'organisation sur notre plateforme n'a pas été approuvée.</p>
+
+      <div class="reason-box">
+        <div class="reason-label">Motif du refus :</div>
+        <div class="reason-text">{{reason}}</div>
+      </div>
+
+      <p>Cette décision ne remet pas en cause la qualité de votre organisation. Nous vous invitons à prendre en compte les éléments mentionnés ci-dessus avant de soumettre une nouvelle demande.</p>
+
+      <div class="support-info">
+        <p>Notre équipe reste à votre disposition pour toute question ou clarification supplémentaire.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <a href="mailto:{{supportEmail}}" class="contact-button">
+        Contacter le support
+      </a>
+    </div>
+  </div>
+</body>
+</html>

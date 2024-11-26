@@ -1,0 +1,26 @@
+// backend/templates/new-question-notification.hbs
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    .container { padding: 20px; font-family: Arial, sans-serif; }
+    .header { color: #2563eb; font-size: 24px; margin-bottom: 20px; }
+    .content { color: #374151; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      Nouvelle question créée
+    </div>
+    <div class="content">
+      <p>Une nouvelle question a été créée par <strong>{{organizationName}}</strong> :</p>
+      <p><strong>{{questionTitle}}</strong></p>
+      <a href="{{adminDashboardUrl}}" style="display: inline-block; padding: 10px 20px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px;">
+        Voir dans le tableau de bord
+      </a>
+    </div>
+  </div>
+</body>
+</html>
