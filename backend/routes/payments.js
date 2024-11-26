@@ -99,11 +99,22 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
 router.post('/create-payment-session', authenticateUser, async (req, res) => {
   try {
     console.log('Creating payment session for:', req.user.id);
+    console.log('FRONTEND_URL:', process.env.FRONTEND_URL); 
     const { amount } = req.body;
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ error: 'Montant invalide.' });
     }
+
+    // Vérifiez que FRONTEND_URL est défini
+    if (!process.env.FRONTEND_URL) {
+      console.error('FRONTEND_URL is not defined in environment variables');
+      return res.status(500).json({ error: 'Configuration error' });
+    }
+
+    // Construction des URLs avec vérification
+    const successUrl = new URL('/success', process.env.FRONTEND_URL);
+    const cancelUrl = new URL('/cancel', process.env.FRONTEND_URL);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -113,24 +124,50 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
             currency: 'cad',
             product_data: {
               name: 'Recharge de Tokens',
+              description: `Achat de ${amount} tokens`,
             },
-            unit_amount: amount * 100, // Stripe utilise les centimes
+            unit_amount: amount * 100,
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
-
-      client_reference_id: req.user.id, // Pour identifier l'utilisateur
+      success_url: `${successUrl.toString()}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl.toString(),
+      client_reference_id: req.user.id,
+      metadata: {
+        userId: req.user.id,
+        amount: amount,
+        type: 'token_purchase'
+      }
     });
 
+    console.log('Success URL:', session.success_url);
+    console.log('Cancel URL:', session.cancel_url);
     console.log('Payment session created:', session.id);
-    res.status(200).json({ url: session.url });
+    
+    res.status(200).json({ 
+      url: session.url,
+      sessionId: session.id
+    });
   } catch (err) {
     console.error('Error creating payment session:', err);
-    res.status(500).json({ error: 'Erreur lors de la création de la session Stripe.' });
+    console.error('Error details:', err.message);
+    res.status(500).json({ 
+      error: 'Erreur lors de la création de la session Stripe.',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
+// Ajoutez aussi une route pour vérifier l'état de la session
+router.get('/check-session/:sessionId', authenticateUser, async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
+    res.json({ status: session.status });
+  } catch (err) {
+    console.error('Error checking session:', err);
+    res.status(500).json({ error: 'Erreur lors de la vérification de la session' });
   }
 });
 

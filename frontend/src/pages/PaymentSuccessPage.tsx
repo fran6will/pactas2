@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { CheckCircle } from 'lucide-react';
 
@@ -7,15 +7,38 @@ const PaymentSuccessPage = () => {
   const navigate = useNavigate();
   const { refreshUser } = useUser();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    console.log("PaymentSuccessPage mounted");
+    console.log("Current path:", location.pathname);
+    console.log("Search params:", location.search);
+    console.log("Session ID:", sessionId);
+
     if (sessionId) {
-      console.log('Payment session ID:', sessionId);
+      refreshUser();
+      
+      // Redirection automatique après 5 secondes
+      const timer = setTimeout(() => {
+        navigate('/dashboard');
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    } else {
+      console.log("No session ID found, redirecting...");
+      navigate('/dashboard');
     }
-    // Rafraîchir les données de l'utilisateur après le paiement
-    refreshUser();
-  }, [refreshUser, sessionId]);
+  }, [sessionId, refreshUser, navigate, location]);
+
+  // Si pas de sessionId, afficher un message de chargement
+  if (!sessionId) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <p>Redirection en cours...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
@@ -41,12 +64,9 @@ const PaymentSuccessPage = () => {
               Voir mon solde
             </button>
 
-            <button
-              onClick={() => navigate('/')}
-              className="w-full text-blue-600 hover:text-blue-700"
-            >
-              Retour à l'accueil
-            </button>
+            <p className="text-sm text-gray-500">
+              Redirection automatique dans quelques secondes...
+            </p>
           </div>
         </div>
       </div>
