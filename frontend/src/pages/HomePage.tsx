@@ -1,8 +1,10 @@
+import { api } from '../services/api.service';
+
 import { useState, useEffect } from 'react';
 import QuestionCard from '../components/questions/QuestionCard';
 import { QuestionFilters } from '../components/QuestionFilters';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { api } from '../services/api.service';
+
 interface Question {
   id: string;
   title: string;
@@ -43,14 +45,14 @@ const HomePage = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        setIsLoading(true);
-        console.log('Fetching questions...'); 
-        const data = await api.get('/questions');
-        console.log('Questions received:', data); 
+        console.log('Fetching questions...');
+        const data = await api.get('/questions'); // Utilisez le service api à la place de fetch
+        console.log('Questions fetched:', data);
         setQuestions(data);
-      } catch (err) {
+        setFilteredQuestions(data);
+      } catch (err: any) {
         console.error('Error fetching questions:', err);
-        setError(err.message);
+        setError(err.message || 'Une erreur est survenue');
       } finally {
         setIsLoading(false);
       }

@@ -23,7 +23,7 @@ const io = new Server(httpServer, {
   cors: {
     origin: [
       'https://pactas2.onrender.com', 
-      'http://localhost:5173',        
+      'http://localhost:4173',        
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -48,7 +48,8 @@ app.use((req, res, next) => {
 // Middleware CORS
 app.use(
     cors({
-      origin: 'https://pactas2.onrender.com',
+      origin: ['https://pactas2.onrender.com',
+      'http://localhost:4173', ],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       credentials: true,
       allowedHeaders: ['Content-Type', 'Authorization'],

@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'https://pacta-backend.onrender.com/api';
+
          
 
 export const api = {
@@ -28,15 +29,16 @@ export const api = {
         ...defaultHeaders,
         ...options.headers,
       },
-      credentials: 'include',
     };
 
     try {
+      console.log('Requesting:', `${API_URL}${endpoint}`);
       const response = await fetch(`${API_URL}${endpoint}`, config);
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Une erreur est survenue');
+        const text = await response.text();
+        console.error('Response:', text);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       return response.json();
