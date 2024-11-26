@@ -1,24 +1,64 @@
 // src/pages/PackSuccessPage.tsx
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Loader } from 'lucide-react';
 
 const PackSuccessPage = () => {
   const navigate = useNavigate();
   const { refreshUser } = useUser();
+  const [searchParams] = useSearchParams();
+  const [isVerifying, setIsVerifying] = useState(true);
+  const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
-    // Rafraîchir les données utilisateur au chargement de la page
-    refreshUser();
-    
-    // Rediriger après 5 secondes
-    const timer = setTimeout(() => {
-      navigate('/organization/dashboard');
-    }, 5000);
+    const verifyPayment = async () => {
+      if (!sessionId) {
+        navigate('/organization/dashboard');
+        return;
+      }
 
-    return () => clearTimeout(timer);
-  }, [navigate, refreshUser]);
+      try {
+        const response = await fetch(`/api/payments/check-session/${sessionId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const data = await response.json();
+
+        if (data.status === 'complete') {
+          await refreshUser();
+          setIsVerifying(false);
+          
+          // Démarrer le compte à rebours après la vérification
+          const timer = setTimeout(() => {
+            navigate('/organization/dashboard');
+          }, 5000);
+
+          return () => clearTimeout(timer);
+        } else {
+          // Si le paiement n'est pas complet, rediriger immédiatement
+          navigate('/organization/dashboard');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du paiement:', error);
+        navigate('/organization/dashboard');
+      }
+    };
+
+    verifyPayment();
+  }, [sessionId, navigate, refreshUser]);
+
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="flex flex-col items-center">
+          <Loader className="w-8 h-8 text-blue-500 animate-spin" />
+          <p className="mt-4 text-gray-600">Vérification du paiement...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -39,6 +79,9 @@ const PackSuccessPage = () => {
           >
             Retour au tableau de bord
           </button>
+          <p className="text-sm text-gray-500 mt-4">
+            Redirection automatique dans quelques secondes...
+          </p>
         </div>
       </div>
     </div>
