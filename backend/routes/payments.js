@@ -10,6 +10,7 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
 // backend/routes/payments.js
 router.get('/success', (req, res) => {
+  console.log('Redirecting to:', `${process.env.FRONTEND_URL}/success`);
   res.redirect(`${process.env.FRONTEND_URL}/success`);
 });
 
