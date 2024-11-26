@@ -11,7 +11,6 @@ const router = express.Router();
 // backend/routes/payments.js
 
 
-app.use(express.raw({ type: 'application/json' })); // Avant vos routes
 
 
 router.get('/success', (req, res) => {
@@ -182,18 +181,11 @@ router.get('/check-session/:sessionId', authenticateUser, async (req, res) => {
 
 // backend/routes/payments.js
 
-// Update the webhook route handler
-router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
-  // Ensure we have a raw body for Stripe
-  if (req.body.raw) {
-      req.body = req.body.raw;
-  }
-  
+router.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
 
   try {
-      // Log the received data for debugging
       console.log('Received webhook request:', {
           headers: req.headers,
           signatureHeader: sig,
@@ -208,7 +200,6 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
 
       console.log('Webhook event constructed successfully:', event.type);
 
-      // Handle the checkout.session.completed event
       if (event.type === 'checkout.session.completed') {
           const session = event.data.object;
           
@@ -217,9 +208,9 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
               clientReferenceId: session.client_reference_id
           });
 
+          // Gestion des packs de questions
           if (session.metadata?.type === 'question_pack') {
               try {
-                  // Get user and organization
                   const user = await prisma.user.findUnique({
                       where: { id: session.client_reference_id },
                       include: { organization: true }
@@ -229,7 +220,6 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                       throw new Error(`User not found: ${session.client_reference_id}`);
                   }
 
-                  // Create organization if it doesn't exist
                   let organizationId = user.organization?.id;
                   if (!organizationId) {
                       const newOrg = await prisma.organization.create({
@@ -240,13 +230,10 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                           }
                       });
                       organizationId = newOrg.id;
-                      console.log('Created new organization:', organizationId);
                   }
 
                   const questionsToAdd = parseInt(session.metadata.questions);
-
-                  // Update organization and create transaction
-                  const result = await prisma.$transaction([
+                  await prisma.$transaction([
                       prisma.organization.update({
                           where: { id: organizationId },
                           data: {
@@ -262,17 +249,20 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                           }
                       })
                   ]);
-
-                  console.log('Transaction completed successfully:', result);
               } catch (error) {
                   console.error('Error processing question pack:', error);
-                  // Don't throw here - we still want to return 200 to Stripe
-                  // but log the error for debugging
+              }
+          }
+          // Gestion des achats de tokens
+          else if (session.metadata?.type === 'token_purchase') {
+              try {
+                  await updateUserTokens(session);
+              } catch (error) {
+                  console.error('Error processing token purchase:', error);
               }
           }
       }
 
-      // Send successful response to Stripe
       res.json({ received: true, type: event.type });
       
   } catch (err) {
@@ -282,7 +272,6 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
           body: req.body
       });
       
-      // Return a 400 error to Stripe so they retry the webhook
       return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 });

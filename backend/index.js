@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+
+
 const { Server } = require('socket.io');
 const { createServer } = require('http');
 const { PrismaClient } = require('@prisma/client');
@@ -32,16 +34,11 @@ const io = new Server(httpServer, {
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.SECRET_KEY;
 
-// Middleware JSON appliqué à toutes les routes SAUF les webhooks Stripe
-app.use((req, res, next) => {
-    // Si la requête est pour le webhook, ne pas parser le JSON
-    if (req.originalUrl === '/api/payments/webhook') {
-      next();
-    } else {
-      express.json()(req, res, next);
-    }
-  });
+// Configurer le raw parser pour le webhook Stripe
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
+// Configurer le JSON parser pour toutes les autres routes
+app.use(express.json());
 // Middleware CORS
 app.use(
     cors({
