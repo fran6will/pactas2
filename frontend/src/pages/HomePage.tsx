@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import QuestionCard from '../components/questions/QuestionCard';
 import { QuestionFilters } from '../components/QuestionFilters';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
+import { api } from '../services/api.service';
 interface Question {
   id: string;
   title: string;
