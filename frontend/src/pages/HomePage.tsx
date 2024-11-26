@@ -43,16 +43,14 @@ const HomePage = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        console.log('Fetching questions...');
-        const response = await fetch('https://pactas2.onrender.com/api/questions');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        console.log('Questions fetched:', data);
+        setIsLoading(true);
+        console.log('Fetching questions...'); 
+        const data = await api.get('/questions');
+        console.log('Questions received:', data); 
         setQuestions(data);
-        setFilteredQuestions(data);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error fetching questions:', err);
-        setError(err.message || 'Une erreur est survenue');
+        setError(err.message);
       } finally {
         setIsLoading(false);
       }

@@ -1,7 +1,5 @@
-// src/services/api.service.ts
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://pactas2.onrender.comapi'  
-  : 'https://pactas2.onrender.com/api';            
+const API_URL = import.meta.env.VITE_API_URL;
+         
 
 export const api = {
   getToken() {
