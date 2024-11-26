@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 // Middleware CORS
 app.use(
     cors({
-      origin: 'http://localhost:5173',
+      origin: 'https://pactas2.onrender.com',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       credentials: true,
       allowedHeaders: ['Content-Type', 'Authorization'],
