@@ -22,5 +22,17 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true
+  },
+  server: {
+    historyApiFallback: {
+      disableDotRule: true
+    }
+  },
+  preview: {
+    port: 5173,
+    strictPort: true,
+    historyApiFallback: {
+      disableDotRule: true
+    }
   }
 })
