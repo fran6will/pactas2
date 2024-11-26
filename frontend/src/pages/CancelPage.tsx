@@ -5,14 +5,20 @@ import { XCircle } from 'lucide-react';
 
 const CancelPage = () => {
   const navigate = useNavigate();
+  const { user } = useUser(); // Ajoutez ceci
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/organization/dashboard');
+      // Rediriger vers le dashboard approprié selon l'état de l'authentification
+      if (user) {
+        navigate('/organization/dashboard');
+      } else {
+        navigate('/');  // ou '/auth' ou une autre page publique
+      }
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, user]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
