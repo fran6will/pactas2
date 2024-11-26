@@ -1,4 +1,6 @@
 const express = require('express');
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
+
 const cors = require('cors');
 const { Server } = require('socket.io');
 const { createServer } = require('http');
@@ -21,7 +23,7 @@ const prisma = new PrismaClient();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ['https://pactas2.onrender.com', 'http://localhost:4173'],
+    origin: ['*'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -45,7 +47,7 @@ app.use((req, res, next) => {
 // Middleware CORS
 app.use(
     cors({
-      origin: ['https://pactas2.onrender.com',
+      origin: ['*',
       'http://localhost:4173', ],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       credentials: true,

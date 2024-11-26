@@ -61,13 +61,17 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
         metadata: {
           type: 'question_pack',
           packId,
-          questions: pack.questions.toString()
+          questions: pack.questions.toString(),
+          organizationId: req.user.organization?.id 
+
         }
       });
   
       res.status(200).json({ url: session.url });
     } catch (err) {
       console.error('Error creating session:', err);
+      console.log('Session metadata:', session.metadata);
+
       res.status(500).json({ error: 'Erreur lors de la création de la session.' });
     }
   });
