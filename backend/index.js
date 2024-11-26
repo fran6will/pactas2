@@ -20,11 +20,11 @@ const userRoutes = require('./routes/users');
 const prisma = new PrismaClient();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
+  const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  // Configuration CORS pour Socket.IO
   cors: {
-    origin: [
-      'https://pactas2.onrender.com', 
-      'http://localhost:4173',        
-    ],
+    origin: ['https://pactas2.onrender.com', 'http://localhost:4173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -37,33 +37,32 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 // Middleware JSON appliqué à toutes les routes SAUF les webhooks Stripe
 app.use((req, res, next) => {
-    // Si la requête est pour le webhook, ne pas parser le JSON
-    if (req.originalUrl === '/api/payments/webhook') {
-      next();
-    } else {
-      express.json()(req, res, next);
-    }
-  });
+  // Si la requête est pour le webhook, ne pas parser le JSON
+  if (req.originalUrl === '/api/payments/webhook') {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
 // Middleware CORS
 app.use(
-    cors({
-      origin: ['https://pactas2.onrender.com',
-      'http://localhost:4173', ],
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    })
-  );
+  cors({
+    origin: ['https://pactas2.onrender.com', 'http://localhost:4173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 // Middleware global de logs
 app.use((req, res, next) => {
-    console.log('Request received:', {
-      method: req.method,
-      path: req.path,
-      body: req.body,
-    });
-    next();
+  console.log('Request received:', {
+    method: req.method,
+    path: req.path,
+    body: req.body,
   });
+  next();
+});
 // Routes API principales
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
