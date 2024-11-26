@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider } from './context/UserContext';
 import { useUser } from './context/UserContext';
-import Layout from './components/layout/Layout';
+import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
