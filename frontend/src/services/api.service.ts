@@ -1,5 +1,7 @@
 // src/services/api.service.ts
-const API_URL = 'http://localhost:3000/api';
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://pactas2.onrender.com/api'  // URL de votre backend déployé
+  : 'http://localhost:3000/api';              // URL locale
 
 export const api = {
   getToken() {
