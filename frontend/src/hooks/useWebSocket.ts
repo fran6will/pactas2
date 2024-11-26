@@ -6,7 +6,7 @@ let socket: Socket;
 
 export const useWebSocket = (questionId: string, onUpdate: (data: any) => void) => {
   useEffect(() => {
-    socket = io('http://localhost:3000');
+    socket = io('https://pactas2.onrender.com/');
 
     socket.on(`question:${questionId}:update`, onUpdate);
 

@@ -44,7 +44,7 @@ const HomePage = () => {
     const fetchQuestions = async () => {
       try {
         console.log('Fetching questions...');
-        const response = await fetch('http://localhost:3000/api/questions');
+        const response = await fetch('https://pactas2.onrender.com//api/questions');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         console.log('Questions fetched:', data);

@@ -16,7 +16,7 @@ const TransactionHistoryPage: React.FC = () => {
 
     const fetchTransactions = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/transactions/${user.id}`);
+        const response = await fetch(`https://pactas2.onrender.com//api/transactions/${user.id}`);
         if (!response.ok) {
           throw new Error('Erreur lors du chargement des transactions');
         }

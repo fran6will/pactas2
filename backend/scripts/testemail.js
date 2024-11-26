@@ -8,7 +8,7 @@ const { emailService } = require('../services/email.service');
       template: 'organization-approved',
       data: {
         organizationName: 'Test Organization',
-        loginUrl: 'http://localhost:3000/auth',
+        loginUrl: 'https://pactas2.onrender.com//auth',
       },
     });
     console.log('Email envoyé avec succès');
