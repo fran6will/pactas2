@@ -1,8 +1,5 @@
 routes:
-  # Servir le fichier statique success.html
-  - type: static
-    source: /success.html
-    destination: /public/success.html
+  
 
   # Rediriger toutes les autres routes vers index.html (SPA)
   - type: rewrite
