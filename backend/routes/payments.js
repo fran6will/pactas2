@@ -125,23 +125,36 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
 
 router.post('/create-payment-session', authenticateUser, async (req, res) => {
   try {
-    console.log('Creating payment session for:', req.user.id);
-    console.log('FRONTEND_URL:', process.env.FRONTEND_URL); 
+    console.log('Creating payment session with data:', {
+      userId: req.user?.id,
+      amount: req.body.amount,
+      backendUrl: process.env.BACKEND_URL,
+      frontendUrl: process.env.FRONTEND_URL
+    });
+
     const { amount } = req.body;
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ error: 'Montant invalide.' });
     }
 
-    // Vérifiez que FRONTEND_URL est défini
-    if (!process.env.FRONTEND_URL) {
-      console.error('FRONTEND_URL is not defined in environment variables');
-      return res.status(500).json({ error: 'Configuration error' });
+    // Vérification des variables d'environnement
+    if (!process.env.BACKEND_URL || !process.env.FRONTEND_URL) {
+      console.error('Missing environment variables:', {
+        BACKEND_URL: !!process.env.BACKEND_URL,
+        FRONTEND_URL: !!process.env.FRONTEND_URL
+      });
+      return res.status(500).json({ error: 'Configuration error - Missing URLs' });
     }
 
-    // Construction des URLs avec vérification
-    const successUrl = new URL('/success', process.env.FRONTEND_URL);
-    const cancelUrl = new URL('/cancel', process.env.FRONTEND_URL);
+    // S'assurer que les URLs sont complètes
+    const backendUrl = process.env.BACKEND_URL.startsWith('http') 
+      ? process.env.BACKEND_URL 
+      : `https://${process.env.BACKEND_URL}`;
+    
+    const frontendUrl = process.env.FRONTEND_URL.startsWith('http') 
+      ? process.env.FRONTEND_URL 
+      : `https://${process.env.FRONTEND_URL}`;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -159,10 +172,8 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.BACKEND_URL}/api/payments/success?session_id={CHECKOUT_SESSION_ID}`,
-
-
-      cancel_url: cancelUrl.toString(),
+      success_url: `${backendUrl}/api/payments/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/cancel`,
       client_reference_id: req.user.id,
       metadata: {
         userId: req.user.id,
@@ -171,24 +182,32 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
       }
     });
 
-    console.log('Success URL:', session.success_url);
-    console.log('Cancel URL:', session.cancel_url);
-    console.log('Payment session created:', session.id);
-    
+    console.log('Session created successfully:', {
+      sessionId: session.id,
+      successUrl: session.success_url,
+      cancelUrl: session.cancel_url
+    });
+
     res.status(200).json({ 
       url: session.url,
       sessionId: session.id
     });
   } catch (err) {
-    console.error('Error creating payment session:', err);
-    console.error('Error details:', err.message);
+    console.error('Detailed error creating session:', {
+      error: err.message,
+      stack: err.stack,
+      urls: {
+        backend: process.env.BACKEND_URL,
+        frontend: process.env.FRONTEND_URL
+      }
+    });
+
     res.status(500).json({ 
       error: 'Erreur lors de la création de la session Stripe.',
       details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 });
-
 // Ajoutez aussi une route pour vérifier l'état de la session
 router.get('/check-session/:sessionId', authenticateUser, async (req, res) => {
   try {
