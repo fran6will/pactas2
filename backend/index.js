@@ -47,16 +47,17 @@ app.use(cors({
 
 app.use(express.json());
 
-// Routes pour gérer les redirections de paiement
-app.get('/payment-success', (req, res) => {
-  const { session_id, type } = req.query;
-  const successPath = type === 'pack' ? '/pack-success' : '/token-success';
-  res.redirect(`${frontendUrl}${successPath}?session_id=${session_id}`);
+// Add these specific success routes before the catch-all route
+app.get('/token-success', (req, res) => {
+  const sessionId = req.query.session_id;
+  res.redirect(`${frontendUrl}/token-success?session_id=${sessionId}`);
 });
 
-app.get('/payment-cancel', (req, res) => {
-  res.redirect(`${frontendUrl}/cancel`);
+app.get('/pack-success', (req, res) => {
+  const sessionId = req.query.session_id;
+  res.redirect(`${frontendUrl}/pack-success?session_id=${sessionId}`);
 });
+
 // Logs des requêtes
 app.use((req, res, next) => {
   console.log('Request received:', {

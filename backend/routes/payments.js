@@ -59,7 +59,7 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${process.env.BACKEND_URL}/payment-success?type=pack&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.FRONTEND_URL}/pack-success?session_id={CHECKOUT_SESSION_ID}`,
 
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       client_reference_id: req.user.id,
@@ -99,7 +99,7 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${process.env.BACKEND_URL}/payment-success?type=token&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.FRONTEND_URL}/token-success?session_id={CHECKOUT_SESSION_ID}`,
 
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       client_reference_id: req.user.id,
