@@ -26,7 +26,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         app: './index.html' 
-    }
+      }
+    }  // <-- Cette accolade manquait
   },
   server: {
     port: 5173,
