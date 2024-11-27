@@ -13,7 +13,7 @@ const router = express.Router();
 
 
 
-r// Ajoutez cette route pour gérer la redirection success
+// Ajoutez cette route pour gérer la redirection success
 router.get('/success', async (req, res) => {
   const sessionId = req.query.session_id;
   
