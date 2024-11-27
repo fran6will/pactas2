@@ -32,9 +32,9 @@ function AppRoutes() {
       {/* Routes publiques */}
       <Route path="/token-success" element={<TokenSuccessPage />} />
       <Route path="/pack-success" element={<PackSuccessPage />} />
-      <Routes>
+
   <Route path="/success" element={<SuccessPage />} />
-</Routes>
+
       <Route path="/cancel" element={<PaymentCancelPage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/" element={<HomePage />} />
