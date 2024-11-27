@@ -46,34 +46,26 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
       return res.status(400).json({ error: 'Invalid pack.' });
     }
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'cad',
-          product_data: {
-            name: 'Token Recharge',
-          },
-          unit_amount: amount * 100,
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      // Modified success URL to go to backend first
-      success_url: `${process.env.BACKEND_URL}/api/payments/success?session_id={CHECKOUT_SESSION_ID}&type=token`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
-      client_reference_id: req.user.id,
-      metadata: {
-        type: 'token_purchase',
-        amount: amount.toString(),
-      },
-    });
-
-    res.status(200).json({ url: session.url });
-  } catch (err) {
-    console.error('Error creating pack session:', err);
-    res.status(500).json({ error: 'Failed to create pack session.' });
-  }
+    // For token purchases
+const session = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  line_items: [{
+    price_data: {
+      currency: 'cad',
+      product_data: { name: 'Token Recharge' },
+      unit_amount: amount * 100,
+    },
+    quantity: 1,
+  }],
+  mode: 'payment',
+  // The correct format for success URL with session ID
+  success_url: `${process.env.FRONTEND_URL}/token-success?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+  client_reference_id: req.user.id,
+  metadata: {
+    type: 'token_purchase',
+    amount: amount.toString(),
+  },
 });
 
 // Route pour créer une session de paiement pour des tokens

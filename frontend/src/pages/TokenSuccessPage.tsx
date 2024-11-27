@@ -6,29 +6,33 @@ import { CheckCircle } from 'lucide-react';
 
 const TokenSuccessPage = () => {
   const navigate = useNavigate();
-  const { refreshUser, user } = useUser();
+  const { refreshUser } = useUser();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [checkCount, setCheckCount] = useState(0);
 
   useEffect(() => {
-    if (sessionId) {
-      const checkInterval = setInterval(async () => {
-        await refreshUser();
-        setCheckCount(prev => prev + 1);
-      }, 1000);
-
-      const timer = setTimeout(() => {
-        clearInterval(checkInterval);
+    const verifyPayment = async () => {
+      if (!sessionId) {
         navigate('/dashboard');
-      }, 5000);
+        return;
+      }
 
-      return () => {
-        clearInterval(checkInterval);
-        clearTimeout(timer);
-      };
-    }
-  }, [navigate, refreshUser, sessionId]);
+      try {
+        await refreshUser();
+        // Redirect after 5 seconds
+        const timer = setTimeout(() => {
+          navigate('/dashboard');
+        }, 5000);
+
+        return () => clearTimeout(timer);
+      } catch (error) {
+        console.error('Error:', error);
+        navigate('/dashboard');
+      }
+    };
+
+    verifyPayment();
+  }, [sessionId, navigate, refreshUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -54,5 +58,4 @@ const TokenSuccessPage = () => {
     </div>
   );
 };
-
 export default TokenSuccessPage;
