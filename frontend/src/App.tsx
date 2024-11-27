@@ -121,3 +121,6 @@ function App() {
     </Router>
   );
 }
+
+export default App;  // Assurez-vous que cette ligne est présente
+
