@@ -58,6 +58,14 @@ app.get('/pack-success', (req, res) => {
   res.redirect(`${frontendUrl}/pack-success?session_id=${sessionId}`);
 });
 
+// Votre route catch-all existante
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  const targetUrl = `${frontendUrl}${req.path}${req.query ? '?' + new URLSearchParams(req.query).toString() : ''}`;
+  res.redirect(targetUrl);
+});
 // Logs des requêtes
 app.use((req, res, next) => {
   console.log('Request received:', {
@@ -280,12 +288,4 @@ process.on('SIGTERM', () => {
     prisma.$disconnect();
     process.exit(0);
   });
-});
-// Catch-all route en dernier
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  const targetUrl = `${frontendUrl}${req.path}${req.query ? '?' + new URLSearchParams(req.query).toString() : ''}`;
-  res.redirect(targetUrl);
 });
