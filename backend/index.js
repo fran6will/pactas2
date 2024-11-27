@@ -56,7 +56,7 @@ app.use((req, res, next) => {
 });
 
 // Servir les fichiers statiques (React)
-app.use(express.static(path.join(__dirname, 'frontend', 'build')));
+app.use(express.static(path.join(__dirname, 'frontend')));
 
 // Routes API
 app.use('/api/auth', authRoutes);
