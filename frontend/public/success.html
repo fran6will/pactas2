@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Success</title>
+</head>
+<body>
+  <h1>Payment Successful!</h1>
+  <p>Session ID: <span id="session-id"></span></p>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('session-id').textContent = params.get('session_id') || 'No session ID';
+  </script>
+</body>
+</html>
