@@ -17,6 +17,7 @@ router.get('/success', async (req, res) => {
   }
 
   try {
+    // Récupérer la session Stripe pour afficher les détails pertinents
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (!session) {
@@ -24,13 +25,10 @@ router.get('/success', async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL}/error`);
     }
 
-    // Rediriger selon le type de paiement
-    const redirectUrl = {
-      token_purchase: `${process.env.FRONTEND_URL}/token-success?session_id=${sessionId}`,
-      question_pack: `${process.env.FRONTEND_URL}/pack-success?session_id=${sessionId}`
-    }[session.metadata?.type] || `${process.env.FRONTEND_URL}/error`;
-
-    res.redirect(redirectUrl);
+    // Rediriger vers une page commune avec les métadonnées incluses
+    res.redirect(
+      `${process.env.FRONTEND_URL}/success?session_id=${sessionId}&type=${session.metadata?.type || 'unknown'}`
+    );
   } catch (error) {
     console.error('Error retrieving session:', error.message);
     res.redirect(`${process.env.FRONTEND_URL}/error`);
