@@ -108,12 +108,14 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
 });
 
 // Route Webhook pour gérer les événements Stripe
-router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+rrouter.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
   try {
+    // Utilisation du corps brut pour Stripe
     const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
+    // Gestion des événements Stripe
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
 
@@ -134,6 +136,7 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 });
+
 
 // Fonction pour gérer les achats de packs de questions
 async function handleQuestionPackPurchase(session) {

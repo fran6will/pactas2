@@ -19,6 +19,8 @@ const authenticateUser = require('./middleware/authenticateUser');
 const app = express();
 const prisma = new PrismaClient();
 
+app.use(express.raw({ type: 'application/json' })); // Nécessaire pour les webhooks Stripe
+
 // Configuration WebSocket
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -36,15 +38,15 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 // Middlewares globaux
 app.use(cors({
-  origin: ['https://pactas2.onrender.com', 'http://localhost:5173'],
+  origin: ['https://pactas2.onrender.com', 'http://localhost:5173'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
+
 app.use(express.json());
 
-app.use(express.raw({ type: 'application/json' })); // Nécessaire pour les webhooks Stripe
 
 // Logs des requêtes
 app.use((req, res, next) => {
