@@ -47,7 +47,27 @@ app.use(cors({
 
 app.use(express.json());
 
-// Add these specific success routes before the catch-all route
+// In index.js
+
+// Specific success route handler
+app.get('/api/payments/success', (req, res) => {
+  const sessionId = req.query.session_id;
+  const type = req.query.type;
+
+  if (!sessionId) {
+    console.log('No session ID provided');
+    return res.redirect(`${frontendUrl}/error`);
+  }
+
+  console.log(`Processing success redirect for ${type} purchase with session ${sessionId}`);
+  
+  if (type === 'pack') {
+    return res.redirect(`${frontendUrl}/pack-success?session_id=${sessionId}`);
+  }
+  return res.redirect(`${frontendUrl}/token-success?session_id=${sessionId}`);
+});
+
+// Specific routes for direct frontend access
 app.get('/token-success', (req, res) => {
   const sessionId = req.query.session_id;
   res.redirect(`${frontendUrl}/token-success?session_id=${sessionId}`);
@@ -57,7 +77,6 @@ app.get('/pack-success', (req, res) => {
   const sessionId = req.query.session_id;
   res.redirect(`${frontendUrl}/pack-success?session_id=${sessionId}`);
 });
-
 // Votre route catch-all existante
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) {
