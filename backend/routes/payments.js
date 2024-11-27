@@ -108,7 +108,7 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
 });
 
 // Route Webhook pour gérer les événements Stripe
-rrouter.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
   try {
