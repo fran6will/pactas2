@@ -13,13 +13,30 @@ const router = express.Router();
 
 
 
-router.get('/success', (req, res) => {
-  console.log('Redirecting to:', `${process.env.FRONTEND_URL}/success`);
-  res.redirect(`${process.env.FRONTEND_URL}/success`);
-});
+r// Ajoutez cette route pour gérer la redirection success
+router.get('/success', async (req, res) => {
+  const sessionId = req.query.session_id;
+  
+  if (!sessionId) {
+    return res.redirect(`${process.env.FRONTEND_URL}/error`);
+  }
 
-router.get('/cancel', (req, res) => {
-  res.redirect(`${process.env.FRONTEND_URL}/cancel`);
+  try {
+    // Récupérer les infos de la session
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    // Vérifier le type de paiement
+    if (session.metadata?.type === 'token_purchase') {
+      res.redirect(`${process.env.FRONTEND_URL}/token-success?session_id=${sessionId}`);
+    } else if (session.metadata?.type === 'question_pack') {
+      res.redirect(`${process.env.FRONTEND_URL}/pack-success?session_id=${sessionId}`);
+    } else {
+      res.redirect(`${process.env.FRONTEND_URL}/success?session_id=${sessionId}`);
+    }
+  } catch (error) {
+    console.error('Error retrieving session:', error);
+    res.redirect(`${process.env.FRONTEND_URL}/error`);
+  }
 });
 router.post('/create-pack-payment-session', authenticateUser, async (req, res) => {
     try {
@@ -59,7 +76,8 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
           quantity: 1,
         }],
         mode: 'payment',
-        success_url: `${process.env.FRONTEND_URL}/pack-success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${process.env.BACKEND_URL}/api/payments/success?session_id={CHECKOUT_SESSION_ID}`,
+
 
         cancel_url: `${process.env.FRONTEND_URL}/cancel`,
         client_reference_id: req.user.id, // ID de l'utilisateur
@@ -141,7 +159,8 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/token-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.BACKEND_URL}/api/payments/success?session_id={CHECKOUT_SESSION_ID}`,
+
 
       cancel_url: cancelUrl.toString(),
       client_reference_id: req.user.id,

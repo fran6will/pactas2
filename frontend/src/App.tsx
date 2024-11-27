@@ -30,6 +30,10 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Routes publiques */}
+      <Route path="/token-success" element={<TokenSuccessPage />} />
+      <Route path="/pack-success" element={<PackSuccessPage />} />
+      <Route path="/success" element={<PaymentSuccessPage />} />
+      <Route path="/cancel" element={<PaymentCancelPage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/" element={<HomePage />} />
       <Route path="/question/:id" element={<QuestionPage />} />
@@ -38,10 +42,7 @@ function AppRoutes() {
       <Route path="/organizations" element={<OrganizationsPage />} />
       <Route path="/how-it-works" element={<HowItWorksPage />} />
       
-      <Route path="/token-success" element={<TokenSuccessPage />} />
-      <Route path="/pack-success" element={<PackSuccessPage />} />
-      <Route path="/success" element={<PaymentSuccessPage />} />
-      <Route path="/cancel" element={<PaymentCancelPage />} />
+      
       {/* Routes protégées */}
       <Route
         path="/dashboard"
@@ -101,13 +102,18 @@ function AppRoutes() {
 }
 
 function App() {
+  console.log("App rendering");
   return (
     <Router>
       <UserProvider>
         <div className="min-h-screen bg-gray-50">
           <Layout>
             <div className="container mx-auto px-4">
-              <AppRoutes />
+              <Routes>
+                {console.log("Routes rendering")}
+                <Route path="/success" element={<PaymentSuccessPage />} />
+                {/* autres routes... */}
+              </Routes>
             </div>
           </Layout>
         </div>
@@ -115,5 +121,3 @@ function App() {
     </Router>
   );
 }
-
-export default App;
