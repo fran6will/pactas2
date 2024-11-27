@@ -124,16 +124,30 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
   }
 });
 
-// Route pour vérifier une session
-router.get('/check-session/:sessionId', authenticateUser, async (req, res) => {
+router.get('/api/payments/verify-session', async (req, res) => {
+  const sessionId = req.query.session_id;
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Missing session_id' });
+  }
+
   try {
-    const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
-    res.json({ status: session.status });
+    // Récupérer la session depuis Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+
+    res.status(200).json({
+      session,
+      paymentIntent,
+      message: 'Payment verified successfully!',
+    });
   } catch (error) {
-    console.error('Error checking session:', error.message);
-    res.status(500).json({ error: 'Error checking session' });
+    console.error('Error verifying session:', error.message);
+    res.status(500).json({ error: 'Failed to verify session' });
   }
 });
+
+
 
 // Route Webhook pour gérer les événements Stripe
 router.post('/webhook', async (req, res) => {
