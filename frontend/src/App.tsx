@@ -33,7 +33,6 @@ function AppRoutes() {
       <Route path="/token-success" element={<TokenSuccessPage />} />
       <Route path="/pack-success" element={<PackSuccessPage />} />
 
-  <Route path="/success" element={<SuccessPage />} />
 
       <Route path="/cancel" element={<PaymentCancelPage />} />
       <Route path="/auth" element={<AuthPage />} />

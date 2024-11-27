@@ -1,53 +1,41 @@
-// src/pages/PackSuccessPage.tsx
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
-import { CheckCircle, Loader } from 'lucide-react';
-
 const PackSuccessPage = () => {
   const navigate = useNavigate();
-  const { refreshUser } = useUser();
+  const { refreshUser, user } = useUser();
   const [searchParams] = useSearchParams();
   const [isVerifying, setIsVerifying] = useState(true);
   const sessionId = searchParams.get('session_id');
+  const [checkCount, setCheckCount] = useState(0);
 
   useEffect(() => {
-    const verifyPayment = async () => {
-      if (!sessionId) {
-        navigate('/organization/dashboard');
-        return;
-      }
+    if (!sessionId) {
+      navigate('/organization/dashboard');
+      return;
+    }
 
+    const checkInterval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/payments/check-session/${sessionId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
+        await refreshUser();
+        setCheckCount(prev => prev + 1);
 
-        if (data.status === 'complete') {
-          await refreshUser();
+        if (checkCount >= 5) {
           setIsVerifying(false);
-          
-          // Démarrer le compte à rebours après la vérification
-          const timer = setTimeout(() => {
-            navigate('/organization/dashboard');
-          }, 5000);
-
-          return () => clearTimeout(timer);
-        } else {
-          // Si le paiement n'est pas complet, rediriger immédiatement
-          navigate('/organization/dashboard');
+          clearInterval(checkInterval);
         }
       } catch (error) {
-        console.error('Erreur lors de la vérification du paiement:', error);
-        navigate('/organization/dashboard');
+        console.error('Error refreshing user data:', error);
       }
-    };
+    }, 1000);
 
-    verifyPayment();
-  }, [sessionId, navigate, refreshUser]);
+    const redirectTimer = setTimeout(() => {
+      clearInterval(checkInterval);
+      navigate('/organization/dashboard');
+    }, 5000);
+
+    return () => {
+      clearInterval(checkInterval);
+      clearTimeout(redirectTimer);
+    };
+  }, [sessionId, navigate, refreshUser, checkCount]);
 
   if (isVerifying) {
     return (
@@ -87,5 +75,4 @@ const PackSuccessPage = () => {
     </div>
   );
 };
-
 export default PackSuccessPage;

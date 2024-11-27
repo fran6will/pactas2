@@ -6,20 +6,28 @@ import { CheckCircle } from 'lucide-react';
 
 const TokenSuccessPage = () => {
   const navigate = useNavigate();
-  const { refreshUser } = useUser();
+  const { refreshUser, user } = useUser();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const [checkCount, setCheckCount] = useState(0);
 
   useEffect(() => {
     if (sessionId) {
-      refreshUser();
-    }
-    
-    const timer = setTimeout(() => {
-      navigate('/dashboard');
-    }, 5000);
+      const checkInterval = setInterval(async () => {
+        await refreshUser();
+        setCheckCount(prev => prev + 1);
+      }, 1000);
 
-    return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        clearInterval(checkInterval);
+        navigate('/dashboard');
+      }, 5000);
+
+      return () => {
+        clearInterval(checkInterval);
+        clearTimeout(timer);
+      };
+    }
   }, [navigate, refreshUser, sessionId]);
 
   return (
