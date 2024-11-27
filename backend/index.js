@@ -15,7 +15,6 @@ const paymentsRouter = require('./routes/payments');
 const withdrawalRoutes = require('./routes/withdrawals');
 const userRoutes = require('./routes/users');
 const authenticateUser = require('./middleware/authenticateUser');
-const frontendPath = path.resolve(__dirname, '../dist'); 
 
 const app = express();
 const prisma = new PrismaClient();
@@ -44,7 +43,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(express.static(frontendPath));
 
 app.use(express.raw({ type: 'application/json' })); // Nécessaire pour les webhooks Stripe
 
@@ -58,8 +56,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configuration des fichiers statiques générés par Vite
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Routes API
 app.use('/api/auth', authRoutes);
