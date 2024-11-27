@@ -55,8 +55,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Servir les fichiers statiques (React)
-app.use(express.static(path.join(__dirname, 'frontend')));
+// Configuration des fichiers statiques générés par Vite
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Routes API
 app.use('/api/auth', authRoutes);
