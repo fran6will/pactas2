@@ -15,6 +15,7 @@ const paymentsRouter = require('./routes/payments');
 const withdrawalRoutes = require('./routes/withdrawals');
 const userRoutes = require('./routes/users');
 const authenticateUser = require('./middleware/authenticateUser');
+const frontendPath = path.resolve(__dirname, '../dist'); 
 
 const app = express();
 const prisma = new PrismaClient();
@@ -43,6 +44,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.static(frontendPath));
+
 app.use(express.raw({ type: 'application/json' })); // Nécessaire pour les webhooks Stripe
 
 // Logs des requêtes
@@ -239,11 +242,10 @@ io.on('connection', (socket) => {
   });
 });
 
-/// Catch-all pour servir React
+// Catch-all pour servir React
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
-
 
 // Démarrage du serveur
 httpServer.listen(PORT, () => {
