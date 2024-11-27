@@ -19,7 +19,7 @@ const authenticateUser = require('./middleware/authenticateUser');
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(express.raw({ type: 'application/json' })); // Nécessaire pour les webhooks Stripe
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' })); // Webhook Stripe
 
 // Configuration WebSocket
 const httpServer = createServer(app);
