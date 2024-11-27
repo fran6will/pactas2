@@ -1,141 +1,167 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '../../context/UserContext';
-import { useAdmin } from '../../hooks/useAdmin';
-import { useMemo } from 'react';
+import { Menu, X, Home, Settings, Shield, UserIcon, LogOut, Coins, AlertCircle } from 'lucide-react';
 
-import { 
-  Home, 
-  Settings, 
-  LogOut, 
-  User as UserIcon,
-  Shield,
-  Coins,
-  AlertCircle
-} from 'lucide-react';
-import HeroSection from './HeroSection';
-import Footer from './Footer';
-
-const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user, logout, isOrganization, organization } = useUser(); 
+export default function Layout({ children }) {
+  const { user, logout, isOrganization, organization } = useUser();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Vérifier si l'utilisateur est une organisation en attente ou rejetée
-  const isRestrictedOrganization = useMemo(() => {
-    return isOrganization && ['pending', 'rejected'].includes(organization?.status || '');
-  }, [isOrganization, organization]);
-
-  // Vérifier si l'utilisateur est une organisation approuvée
-  const isOrganizationApproved = useMemo(() => {
-    return isOrganization && organization?.status === 'approved';
-  }, [isOrganization, organization]);
-
-  // Vérifier si on est sur la page d'accueil
+  const isRestrictedOrganization = isOrganization && ['pending', 'rejected'].includes(organization?.status || '');
+  const isOrganizationApproved = isOrganization && organization?.status === 'approved';
   const isHomePage = window.location.pathname === '/';
 
   const handleStartProject = () => {
     navigate('/auth?tab=register&type=organization');
+    setIsOpen(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <nav className="navbar">
-        <div className="navbar-container">
-          {/* Logo et liens principaux */}
-          <div className="flex items-center gap-8">
-            <Link to="/" className="text-xl font-bold text-indigo-600 ">
-             Pacta
-            </Link>
-            
+      <nav className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0 flex items-center">
+              <Link to="/" className="text-xl font-bold text-indigo-600">
+                Pacta
+              </Link>
+            </div>
+
+            {/* Desktop Navigation */}
             {user && (
               <div className="hidden md:flex items-center gap-4">
-                {/* Le lien Accueil est toujours visible */}
-                <Link to="/" className="btn btn-secondary">
+                <Link to="/" className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900">
                   <Home className="w-5 h-5 mr-2" />
                   <span>Accueil</span>
                 </Link>
-
-                {/* Tableau de bord uniquement si l'organisation n'est pas restreinte */}
                 {!isRestrictedOrganization && (
-                  <Link to="/dashboard" className="btn btn-secondary">
+                  <Link to="/dashboard" className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900">
                     <Settings className="w-5 h-5 mr-2" />
                     <span>Tableau de bord</span>
                   </Link>
                 )}
-
-                {/* Admin toujours visible pour les admins */}
                 {isAdmin && (
-                  <Link to="/admin" className="btn btn-secondary">
+                  <Link to="/admin" className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900">
                     <Shield className="w-5 h-5 mr-2" />
                     <span>Admin</span>
                   </Link>
                 )}
               </div>
             )}
-          </div>
 
-          {/* Actions utilisateur */}
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                {/* Message d'avertissement pour les organisations restreintes */}
-                {isRestrictedOrganization && (
-                  <div className="flex items-center gap-2 bg-yellow-100 px-4 py-2 rounded-lg">
-                    <AlertCircle className="w-4 h-4 text-yellow-600" />
-                    <span className="text-yellow-700">
-                      {organization?.status === 'pending' 
-                        ? "En attente d'approbation" 
-                        : "Compte rejeté"}
-                    </span>
-                  </div>
-                )}
-
-                {/* Solde uniquement si l'utilisateur n'est PAS une organisation 
-                    OU si c'est une organisation avec un statut "approved" */}
-                {(!isOrganization || isOrganizationApproved) && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full">
-                    <Coins className="w-4 h-4 text-indigo-600" />
-                    <span className="font-medium">{user.tokens} tokens</span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3">
-                  {/* Nom de l'utilisateur toujours visible */}
-                  <span className="text-sm font-medium hidden sm:block">
-                    {user.name}
-                  </span>
-                  {/* Bouton de déconnexion toujours visible */}
-                  <button
-                    onClick={logout}
-                    className="btn btn-secondary p-2"
-                    title="Se déconnecter"
-                  >
+            {/* Desktop User Actions */}
+            <div className="hidden md:flex items-center gap-4">
+              {user ? (
+                <>
+                  {isRestrictedOrganization && (
+                    <div className="flex items-center gap-2 bg-yellow-100 px-4 py-2 rounded-lg">
+                      <AlertCircle className="w-4 h-4 text-yellow-600" />
+                      <span className="text-yellow-700">
+                        {organization?.status === 'pending' ? "En attente d'approbation" : "Compte rejeté"}
+                      </span>
+                    </div>
+                  )}
+                  {(!isOrganization || isOrganizationApproved) && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full">
+                      <Coins className="w-4 h-4 text-indigo-600" />
+                      <span className="font-medium">{user.tokens} tokens</span>
+                    </div>
+                  )}
+                  <span className="text-sm font-medium">{user.name}</span>
+                  <button onClick={logout} className="p-2 text-gray-600 hover:text-gray-900">
                     <LogOut className="w-5 h-5" />
                   </button>
+                </>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <Link to="/auth" className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                    <UserIcon className="w-5 h-5 mr-2" />
+                    <span>Se connecter</span>
+                  </Link>
+                  <button onClick={handleStartProject} className="px-4 py-2 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50">
+                    Démarrer un projet
+                  </button>
                 </div>
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        <div className={`md:hidden ${isOpen ? 'block' : 'hidden'}`}>
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {user ? (
+              <>
+                <Link
+                  to="/"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Accueil
+                </Link>
+                {!isRestrictedOrganization && (
+                  <Link
+                    to="/dashboard"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Tableau de bord
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Admin
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Se déconnecter
+                </button>
               </>
             ) : (
-              <div className="flex items-center gap-4">
-                <Link to="/auth" className="btn btn-primary">
-                  <UserIcon className="w-5 h-5 mr-2" />
-                  <span>Se connecter</span>
+              <>
+                <Link
+                  to="/auth"
+                  className="block w-full px-3 py-2 text-center rounded-md text-base font-medium bg-indigo-600 text-white hover:bg-indigo-700"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Se connecter
                 </Link>
                 <button
                   onClick={handleStartProject}
-                  className="btn btn-secondary"
+                  className="block w-full mt-2 px-3 py-2 text-center rounded-md text-base font-medium border border-indigo-600 text-indigo-600 hover:bg-indigo-50"
                 >
                   Démarrer un projet
                 </button>
-              </div>
+              </>
             )}
           </div>
         </div>
       </nav>
 
       <main className="flex-grow">
-        {/* HeroSection uniquement sur la page d'accueil */}
         {isHomePage && <HeroSection />}
-        
         <div className="container mx-auto px-4">
           {children}
         </div>
@@ -144,6 +170,5 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <Footer />
     </div>
   );
-};
-
+}
 export default Layout;

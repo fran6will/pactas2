@@ -18,7 +18,13 @@ const authenticateUser = require('./middleware/authenticateUser');
 const withdrawalRoutes = require('./routes/withdrawals');
 const app = express();
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+app.use(express.static(path.join(__dirname, 'frontend', 'build')));
 
+
+// Gestion des routes React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+});
 const userRoutes = require('./routes/users');
 
 const prisma = new PrismaClient();
