@@ -5,6 +5,7 @@ import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 
 export default defineConfig({
+  root: '.', 
   plugins: [react()],
   css: {
     postcss: {
@@ -24,8 +25,7 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'index.html')
-      }
+        app: './index.html' 
     }
   },
   server: {
