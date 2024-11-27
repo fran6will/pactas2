@@ -11,7 +11,7 @@ import DashboardPage from './pages/DashboardPage';
 import QuestionPage from './pages/QuestionPage';
 import OrganizationDashboard from './pages/OrganizationDashboard';
 import OrganizationPublicPage from './pages/OrganizationPublicPage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import SuccessPage from './pages/SuccessPage';
 import PaymentCancelPage from './pages/CancelPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
 import AdminPage from './pages/AdminPage';
@@ -32,7 +32,9 @@ function AppRoutes() {
       {/* Routes publiques */}
       <Route path="/token-success" element={<TokenSuccessPage />} />
       <Route path="/pack-success" element={<PackSuccessPage />} />
-      <Route path="/success" element={<PaymentSuccessPage />} />
+      <Routes>
+  <Route path="/success" element={<SuccessPage />} />
+</Routes>
       <Route path="/cancel" element={<PaymentCancelPage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/" element={<HomePage />} />
