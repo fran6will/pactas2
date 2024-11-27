@@ -1,57 +1,75 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
+import { CheckCircle } from 'lucide-react';
 
 const SuccessPage = () => {
+  const navigate = useNavigate();
+  const { refreshUser } = useUser();
+  const [searchParams] = useSearchParams();
   const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const sessionId = params.get('session_id');
-  const [paymentDetails, setPaymentDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    console.log("PaymentSuccessPage mounted");
+    console.log("Current path:", location.pathname);
+    console.log("Search params:", location.search);
+    console.log("Session ID:", sessionId);
+
     if (sessionId) {
-      fetch(`/api/payments/verify-session?session_id=${sessionId}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Failed to fetch payment details');
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setPaymentDetails(data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setError(error.message);
-          setLoading(false);
-        });
+      refreshUser();
+      
+      // Redirection automatique après 5 secondes
+      const timer = setTimeout(() => {
+        navigate('/dashboard');
+      }, 5000);
+
+      return () => clearTimeout(timer);
     } else {
-      setError('Session ID is missing');
-      setLoading(false);
+      console.log("No session ID found, redirecting...");
+      navigate('/dashboard');
     }
-  }, [sessionId]);
+  }, [sessionId, refreshUser, navigate, location]);
 
-  if (loading) {
-    return <div>Loading payment details...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
+  // Si pas de sessionId, afficher un message de chargement
+  if (!sessionId) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <p>Redirection en cours...</p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>Payment Successful!</h1>
-      {paymentDetails ? (
-        <ul>
-          <li>Amount: {paymentDetails.paymentIntent.amount / 100} {paymentDetails.paymentIntent.currency.toUpperCase()}</li>
-          <li>Status: {paymentDetails.paymentIntent.status}</li>
-          <li>Session ID: {paymentDetails.session.id}</li>
-        </ul>
-      ) : (
-        <p>No payment details available.</p>
-      )}
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <div className="max-w-md w-full text-center">
+        <div className="bg-white p-8 rounded-xl shadow-lg">
+          <div className="w-12 h-12 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <CheckCircle className="w-6 h-6 text-green-600" />
+          </div>
+
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Paiement réussi !
+          </h1>
+          
+          <p className="text-gray-600 mb-6">
+            Vos tokens ont été ajoutés à votre compte.
+          </p>
+
+          <div className="space-y-4">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+            >
+              Voir mon solde
+            </button>
+
+            <p className="text-sm text-gray-500">
+              Redirection automatique dans quelques secondes...
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

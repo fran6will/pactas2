@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, Settings, Shield, UserIcon, LogOut, Coins, AlertCircle } from 'lucide-react';
+import { useUser } from '../../context/UserContext';
+import { useAdmin } from '../../hooks/useAdmin';
+import HeroSection from './HeroSection';
+import Footer from './Footer';
 
-export default function Layout({ children }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
   const { user, logout, isOrganization, organization } = useUser();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
 
   const isRestrictedOrganization = isOrganization && ['pending', 'rejected'].includes(organization?.status || '');
   const isOrganizationApproved = isOrganization && organization?.status === 'approved';
@@ -22,14 +26,12 @@ export default function Layout({ children }) {
       <nav className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
-            {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="text-xl font-bold text-indigo-600">
                 Pacta
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
             {user && (
               <div className="hidden md:flex items-center gap-4">
                 <Link to="/" className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900">
@@ -51,7 +53,6 @@ export default function Layout({ children }) {
               </div>
             )}
 
-            {/* Desktop User Actions */}
             <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <>
@@ -65,8 +66,8 @@ export default function Layout({ children }) {
                   )}
                   {(!isOrganization || isOrganizationApproved) && (
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full">
-                      <Coins className="w-4 h-4 text-indigo-600" />
-                      <span className="font-medium">{user.tokens} tokens</span>
+                      <Coins className="w-4 h-4 text-yellow-500" />
+                      <span className="font-medium">{user.tokens}  </span>
                     </div>
                   )}
                   <span className="text-sm font-medium">{user.name}</span>
@@ -87,7 +88,6 @@ export default function Layout({ children }) {
               )}
             </div>
 
-            {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -99,7 +99,6 @@ export default function Layout({ children }) {
           </div>
         </div>
 
-        {/* Mobile menu */}
         <div className={`md:hidden ${isOpen ? 'block' : 'hidden'}`}>
           <div className="px-2 pt-2 pb-3 space-y-1">
             {user ? (

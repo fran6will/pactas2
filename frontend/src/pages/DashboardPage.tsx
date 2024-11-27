@@ -1,4 +1,3 @@
-// src/pages/DashboardPage.tsx
 import { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
 import { Link } from 'react-router-dom';
@@ -8,11 +7,12 @@ import {
   TrendingUp, 
   TrendingDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Coins
 } from 'lucide-react';
 import { api } from '../services/api.service';
 import QuestionCard from '../components/questions/QuestionCard';
-import Stats from '../components/stats/Stats';  // Ajusté le chemin d'importation
+import Stats from '../components/stats/Stats';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -141,8 +141,11 @@ const DashboardPage = () => {
                     )}
                   </td>
                   <td className={`px-6 py-4 font-medium ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {tx.amount > 0 ? '+' : ''}{formatAmount(tx.amount)}€
-                  </td>
+              <div className="flex items-center gap-1">
+                <span>{tx.amount > 0 ? '+' : ''}{formatAmount(tx.amount)}</span>
+                <Coins className="w-4 h-4 text-yellow-500" />
+              </div>
+            </td>
                   <td className="px-6 py-4 text-gray-500">
                     {format(new Date(tx.createdAt), 'dd MMM yyyy HH:mm', { locale: fr })}
                   </td>

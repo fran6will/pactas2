@@ -1,6 +1,4 @@
-const API_URL = 'https://pacta-backend.onrender.com/api';
-
-         
+const API_URL = import.meta.env.VITE_API_URL || 'https://pacta-backend.onrender.com/api';
 
 export const api = {
   getToken() {
@@ -17,10 +15,10 @@ export const api = {
 
   async request(endpoint: string, options: RequestInit = {}) {
     const token = this.getToken();
-    
+
     const defaultHeaders = {
       'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
 
     const config: RequestInit = {
@@ -34,7 +32,7 @@ export const api = {
     try {
       console.log('Requesting:', `${API_URL}${endpoint}`);
       const response = await fetch(`${API_URL}${endpoint}`, config);
-      
+
       if (!response.ok) {
         const text = await response.text();
         console.error('Response:', text);
@@ -75,7 +73,5 @@ export const api = {
   async getOrganizations() {
     const response = await this.get('/organizations');
     return response;
-  }
+  },
 };
-
-

@@ -1,5 +1,6 @@
 const express = require('express');
 const Stripe = require('stripe');
+const bodyParser = require('body-parser');
 const { PrismaClient } = require('@prisma/client');
 const authenticateUser = require('../middleware/authenticateUser');
 
@@ -7,32 +8,15 @@ const prisma = new PrismaClient();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
 
-// Route pour gérer la redirection success
-router.get('/success', async (req, res) => {
+router.get('/success', (req, res) => {
   const sessionId = req.query.session_id;
 
   if (!sessionId) {
-    console.error('Session ID missing');
     return res.redirect(`${process.env.FRONTEND_URL}/error`);
   }
 
-  try {
-    // Récupérer la session Stripe pour afficher les détails pertinents
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-    if (!session) {
-      console.error('Session not found:', sessionId);
-      return res.redirect(`${process.env.FRONTEND_URL}/error`);
-    }
-
-    // Rediriger vers une page commune avec les métadonnées incluses
-    res.redirect(
-      `${process.env.FRONTEND_URL}/success?session_id=${sessionId}&type=${session.metadata?.type || 'unknown'}`
-    );
-  } catch (error) {
-    console.error('Error retrieving session:', error.message);
-    res.redirect(`${process.env.FRONTEND_URL}/error`);
-  }
+  const successUrl = `${process.env.FRONTEND_URL}/token-success?session_id=${sessionId}`;
+  res.redirect(successUrl);
 });
 
 // Route pour créer une session de paiement pour un pack
@@ -47,12 +31,12 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
     const packOptions = {
       pack1: { price: 10, questions: 1 },
       pack2: { price: 18, questions: 3 },
-      pack3: { price: 45, questions: 5 }
+      pack3: { price: 45, questions: 5 },
     };
 
     const pack = packOptions[packId];
     if (!pack) {
-      return res.status(400).json({ error: 'Invalid pack' });
+      return res.status(400).json({ error: 'Invalid pack.' });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -61,37 +45,37 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
         price_data: {
           currency: 'cad',
           product_data: {
-            name: `Pack ${pack.questions} question${pack.questions > 1 ? 's' : ''}`
+            name: `Pack ${pack.questions} question${pack.questions > 1 ? 's' : ''}`,
           },
-          unit_amount: pack.price * 100
+          unit_amount: pack.price * 100,
         },
-        quantity: 1
+        quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.FRONTEND_URL}/pack-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       client_reference_id: req.user.id,
       metadata: {
         type: 'question_pack',
         packId,
-        questions: pack.questions.toString()
-      }
+        questions: pack.questions.toString(),
+      },
     });
 
     res.status(200).json({ url: session.url });
-  } catch (error) {
-    console.error('Error creating session:', error.message);
-    res.status(500).json({ error: 'Error creating Stripe session' });
+  } catch (err) {
+    console.error('Error creating pack session:', err);
+    res.status(500).json({ error: 'Failed to create pack session.' });
   }
 });
 
-// Route pour créer une session de paiement pour les tokens
+// Route pour créer une session de paiement pour des tokens
 router.post('/create-payment-session', authenticateUser, async (req, res) => {
   try {
     const { amount } = req.body;
 
     if (!amount || amount <= 0) {
-      return res.status(400).json({ error: 'Invalid amount' });
+      return res.status(400).json({ error: 'Invalid amount.' });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -101,104 +85,112 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
           currency: 'cad',
           product_data: {
             name: 'Token Recharge',
-            description: `Purchase of ${amount} tokens`
           },
-          unit_amount: amount * 100
+          unit_amount: amount * 100,
         },
-        quantity: 1
+        quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.FRONTEND_URL}/token-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       client_reference_id: req.user.id,
       metadata: {
         type: 'token_purchase',
-        amount
-      }
+        amount: amount.toString(),
+      },
     });
 
-    res.status(200).json({ url: session.url, sessionId: session.id });
-  } catch (error) {
-    console.error('Error creating session:', error.message);
-    res.status(500).json({ error: 'Error creating payment session' });
+    res.status(200).json({ url: session.url });
+  } catch (err) {
+    console.error('Error creating payment session:', err);
+    res.status(500).json({ error: 'Failed to create payment session.' });
   }
 });
-
-router.get('/api/payments/verify-session', async (req, res) => {
-  const sessionId = req.query.session_id;
-
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Missing session_id' });
-  }
-
-  try {
-    // Récupérer la session depuis Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
-
-    res.status(200).json({
-      session,
-      paymentIntent,
-      message: 'Payment verified successfully!',
-    });
-  } catch (error) {
-    console.error('Error verifying session:', error.message);
-    res.status(500).json({ error: 'Failed to verify session' });
-  }
-});
-
-
 
 // Route Webhook pour gérer les événements Stripe
-router.post('/webhook', async (req, res) => {
-  const payload = req.body;
+router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   try {
-    const event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+    const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
 
+      console.log('Webhook received for session:', session.id, 'Type:', session.metadata?.type);
+
       if (session.metadata?.type === 'question_pack') {
-        // Traitement pour les packs
+        await handleQuestionPackPurchase(session);
       } else if (session.metadata?.type === 'token_purchase') {
-        // Traitement pour les tokens
+        await handleTokenPurchase(session);
+      } else {
+        console.warn('Unhandled metadata type:', session.metadata?.type);
       }
     }
 
     res.json({ received: true });
-  } catch (error) {
-    console.error('Webhook error:', error.message);
-    res.status(400).send(`Webhook Error: ${error.message}`);
+  } catch (err) {
+    console.error('Webhook error:', err.message);
+    res.status(400).send(`Webhook Error: ${err.message}`);
   }
 });
 
-// Fonction pour mettre à jour les tokens de l'utilisateur
-async function updateUserTokens(session) {
-  const userId = session.client_reference_id;
-  const amount = session.amount_total / 100;
+// Fonction pour gérer les achats de packs de questions
+async function handleQuestionPackPurchase(session) {
+  const user = await prisma.user.findUnique({
+    where: { id: session.client_reference_id },
+    include: { organization: true },
+  });
 
-  try {
-    await prisma.$transaction(async (prisma) => {
-      await prisma.user.update({
-        where: { id: userId },
-        data: { tokens: { increment: amount } }
-      });
-
-      await prisma.transaction.create({
-        data: {
-          amount,
-          type: 'deposit',
-          user: { connect: { id: userId } }
-        }
-      });
-    });
-  } catch (error) {
-    console.error('Error updating user tokens:', error.message);
-    throw error;
+  if (!user?.organization?.id) {
+    throw new Error(`Organization not found for user: ${session.client_reference_id}`);
   }
+
+  const organizationId = user.organization.id;
+  const questionsToAdd = parseInt(session.metadata.questions, 10);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.organization.update({
+      where: { id: organizationId },
+      data: {
+        availableQuestions: { increment: questionsToAdd },
+        totalQuestionsPurchased: { increment: questionsToAdd },
+      },
+    });
+
+    await tx.transaction.create({
+      data: {
+        amount: session.amount_total / 100,
+        type: 'question_pack_purchase',
+        orgId: organizationId,
+      },
+    });
+  });
+
+  console.log('Processed question pack purchase for organization:', organizationId);
+}
+
+// Fonction pour gérer les achats de tokens
+async function handleTokenPurchase(session) {
+  const userId = session.client_reference_id;
+  const tokensToAdd = session.amount_total / 100;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: { tokens: { increment: tokensToAdd } },
+    });
+
+    await tx.transaction.create({
+      data: {
+        amount: tokensToAdd,
+        type: 'deposit',
+        userId: userId,
+      },
+    });
+  });
+
+  console.log('Processed token purchase for user:', userId);
 }
 
 module.exports = router;

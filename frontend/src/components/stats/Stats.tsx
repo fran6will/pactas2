@@ -1,5 +1,5 @@
 // src/components/stats/Stats.tsx
-import { Award, BarChart3, TrendingUp } from 'lucide-react';
+import { Award, BarChart3, TrendingUp, Coins } from 'lucide-react';
 import BuyTokensForm from '../../BuyTokensForm';  // Corrigé l'import
 
 interface StatsProps {
@@ -22,6 +22,14 @@ const formatAmount = (value: number): string => {
   }).format(value);
 };
 
+
+const AmountDisplay = ({ amount, className }: { amount: number, className?: string }) => (
+  <div className={`flex items-center gap-1 ${className || ''}`}>
+    <span>{amount > 0 ? '+' : ''}{formatAmount(amount)}</span>
+    <Coins className="w-4 h-4 text-yellow-500" />
+  </div>
+);
+
 export const Stats = ({ user, stats }: StatsProps) => {
   if (!stats) return null;
 
@@ -37,7 +45,7 @@ export const Stats = ({ user, stats }: StatsProps) => {
             </div>
           </div>
           <div className="text-4xl font-bold text-blue-600 mb-6">
-            {formatAmount(user?.tokens || 0)}€
+            <AmountDisplay amount={user?.tokens || 0} />
           </div>
           <BuyTokensForm />
         </div>
@@ -95,13 +103,13 @@ export const Stats = ({ user, stats }: StatsProps) => {
             <div>
               <div className="text-sm text-gray-500 mb-1">Gains totaux</div>
               <div className="text-3xl font-bold text-green-500">
-                +{formatAmount(stats.totalWinnings)}€
+                <AmountDisplay amount={stats.totalWinnings} />
               </div>
             </div>
             <div className="border-t pt-4">
               <div className="text-sm text-gray-500 mb-1">Pertes totales</div>
               <div className="text-3xl font-bold text-red-500">
-                -{formatAmount(stats.totalLosses)}€
+                <AmountDisplay amount={-stats.totalLosses} />
               </div>
             </div>
             <div className="border-t pt-4">
@@ -111,8 +119,7 @@ export const Stats = ({ user, stats }: StatsProps) => {
                   ? 'text-green-500' 
                   : 'text-red-500'
               }`}>
-                {stats.totalWinnings - stats.totalLosses > 0 ? '+' : ''}
-                {formatAmount(stats.totalWinnings - stats.totalLosses)}€
+                <AmountDisplay amount={stats.totalWinnings - stats.totalLosses} />
               </div>
             </div>
           </div>

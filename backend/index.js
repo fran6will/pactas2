@@ -1,12 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-
-
+const path = require('path');
 const { Server } = require('socket.io');
 const { createServer } = require('http');
 const { PrismaClient } = require('@prisma/client');
 const { body, validationResult } = require('express-validator');
-const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -14,58 +12,53 @@ const adminRoutes = require('./routes/admin');
 const organizationRoutes = require('./routes/organizations');
 const transactionRoutes = require('./routes/transactions');
 const paymentsRouter = require('./routes/payments');
-const authenticateUser = require('./middleware/authenticateUser');
 const withdrawalRoutes = require('./routes/withdrawals');
-const app = express();
-app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
-app.use(express.static(path.join(__dirname, 'frontend', 'build')));
-
-
-// Gestion des routes React
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
-});
 const userRoutes = require('./routes/users');
+const authenticateUser = require('./middleware/authenticateUser');
 
+const app = express();
 const prisma = new PrismaClient();
+
+// Configuration WebSocket
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ['https://pactas2.onrender.com', 'http://localhost:4173'],
+    origin: ['https://pactas2.onrender.com', 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
-    optionsSuccessStatus: 200
   },
 });
 
+// Ports et Clés
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.SECRET_KEY;
 
-// Configurer le raw parser pour le webhook Stripe
+// Middlewares globaux
+app.use(cors({
+  origin: ['https://pactas2.onrender.com', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
-// Configurer le JSON parser pour toutes les autres routes
 app.use(express.json());
-// Middleware CORS
-app.use(
-    cors({
-      origin: ['https://pactas2.onrender.com',
-      'http://localhost:4173', ],
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    })
-  );
-// Middleware global de logs
+app.use(express.raw({ type: 'application/json' })); // Nécessaire pour les webhooks Stripe
+
+// Logs des requêtes
 app.use((req, res, next) => {
-    console.log('Request received:', {
-      method: req.method,
-      path: req.path,
-      body: req.body,
-    });
-    next();
+  console.log('Request received:', {
+    method: req.method,
+    path: req.path,
+    body: req.body,
   });
-// Routes API principales
+  next();
+});
+
+// Servir les fichiers statiques (React)
+app.use(express.static(path.join(__dirname, 'frontend', 'build')));
+
+// Routes API
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/organizations', organizationRoutes);
@@ -73,67 +66,48 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/organizations', organizationRoutes);
 
-
-
-// Connexion WebSocket
-io.on('connection', (socket) => {
-  console.log('Nouvelle connexion WebSocket:', socket.id);
-
-  socket.on('disconnect', () => {
-    console.log('Client déconnecté:', socket.id);
-  });
-});
-
-
-
-
-// Route pour obtenir toutes les questions
+// Route pour récupérer toutes les questions
 app.get('/api/questions', async (req, res) => {
-    try {
-      const questions = await prisma.question.findMany({
-        include: {
-          bets: true,
-          organization: true,
-        },
-        where: {
-          status: 'active',
-          deadline: {
-            gt: new Date(),
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-  
-      const questionsWithTotals = questions.map((question) => {
-        const totalYes = question.bets
-          .filter((bet) => bet.prediction === 'yes')
-          .reduce((sum, bet) => sum + bet.amount, 0);
-  
-        const totalNo = question.bets
-          .filter((bet) => bet.prediction === 'no')
-          .reduce((sum, bet) => sum + bet.amount, 0);
-  
-        return {
-          ...question,
-          organization: question.organization.name,
-          totalYes,
-          totalNo,
-          totalPool: totalYes + totalNo,
-        };
-      });
-  
-      res.json(questionsWithTotals);
-    } catch (error) {
-      console.error('Error fetching questions:', error);
-      res.status(500).json({ error: 'Erreur serveur lors de la récupération des questions.' });
-    }
-  });
-  
+  try {
+    const questions = await prisma.question.findMany({
+      include: {
+        bets: true,
+        organization: true,
+      },
+      where: {
+        status: 'active',
+        deadline: { gt: new Date() },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
+    const questionsWithTotals = questions.map((question) => {
+      const totalYes = question.bets
+        .filter((bet) => bet.prediction === 'yes')
+        .reduce((sum, bet) => sum + bet.amount, 0);
+
+      const totalNo = question.bets
+        .filter((bet) => bet.prediction === 'no')
+        .reduce((sum, bet) => sum + bet.amount, 0);
+
+      return {
+        ...question,
+        organization: question.organization.name,
+        totalYes,
+        totalNo,
+        totalPool: totalYes + totalNo,
+      };
+    });
+
+    res.json(questionsWithTotals);
+  } catch (error) {
+    console.error('Error fetching questions:', error);
+    res.status(500).json({ error: 'Erreur serveur lors de la récupération des questions.' });
+  }
+});
 // Route pour obtenir une question par ID
 app.get('/api/questions/:id', async (req, res) => {
   try {
@@ -254,6 +228,20 @@ app.use((err, req, res, next) => {
     error: 'Une erreur est survenue',
     details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
+});
+
+// WebSocket Events
+io.on('connection', (socket) => {
+  console.log('Nouvelle connexion WebSocket:', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('Client déconnecté:', socket.id);
+  });
+});
+
+// Catch-all pour servir React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
 });
 
 // Démarrage du serveur
