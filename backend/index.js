@@ -6,6 +6,7 @@ const { createServer } = require('http');
 const { PrismaClient } = require('@prisma/client');
 const { body, validationResult } = require('express-validator');
 require('dotenv').config();
+const frontendUrl = process.env.FRONTEND_URL || 'https://pactas2.onrender.com';
 
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
@@ -67,6 +68,18 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/users', userRoutes);
+
+app.get('*', (req, res, next) => {
+  // If the request is for an API route, let it continue to the API handlers
+  if (req.path.startsWith('/api/')) {
+      return next();
+  }
+  
+  // For all other routes, redirect to the frontend application
+  // This preserves the full path and query parameters
+  const targetUrl = `${frontendUrl}${req.path}${req.query ? '?' + new URLSearchParams(req.query).toString() : ''}`;
+  res.redirect(targetUrl);
+});
 
 // Route pour récupérer toutes les questions
 app.get('/api/questions', async (req, res) => {
