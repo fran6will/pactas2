@@ -81,10 +81,7 @@ io.on('connection', (socket) => {
 });
 
 
-app.get('/success', (req, res) => {
-  console.log('Session ID:', req.query.session_id);
-  res.redirect(`${process.env.FRONTEND_URL}/success?session_id=${req.query.session_id}`);
-});
+
 
 // Route pour obtenir toutes les questions
 app.get('/api/questions', async (req, res) => {
