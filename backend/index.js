@@ -6,7 +6,6 @@ const { createServer } = require('http');
 const { PrismaClient } = require('@prisma/client');
 const { body, validationResult } = require('express-validator');
 require('dotenv').config();
-const frontendUrl = process.env.FRONTEND_URL || 'https://pactas2.onrender.com';
 
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
@@ -69,6 +68,13 @@ app.use('/api/payments', paymentsRouter);
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/users', userRoutes);
 
+
+const frontendUrl = process.env.FRONTEND_URL || 'https://pactas2.onrender.com';
+
+app.get('/pack-success', (req, res) => {
+  const sessionId = req.query.session_id;
+  res.redirect(`${frontendUrl}/pack-success?session_id=${sessionId}`);
+});
 app.get('*', (req, res, next) => {
   // If the request is for an API route, let it continue to the API handlers
   if (req.path.startsWith('/api/')) {
