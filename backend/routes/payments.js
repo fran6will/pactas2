@@ -52,20 +52,20 @@ router.post('/create-pack-payment-session', authenticateUser, async (req, res) =
         price_data: {
           currency: 'cad',
           product_data: {
-            name: `Pack ${pack.questions} question${pack.questions > 1 ? 's' : ''}`,
+            name: 'Token Recharge',
           },
-          unit_amount: pack.price * 100,
+          unit_amount: amount * 100,
         },
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/api/payments/success?session_id={CHECKOUT_SESSION_ID}&type=pack`,
+      // Modified success URL to go to backend first
+      success_url: `${process.env.BACKEND_URL}/api/payments/success?session_id={CHECKOUT_SESSION_ID}&type=token`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       client_reference_id: req.user.id,
       metadata: {
-        type: 'question_pack',
-        packId,
-        questions: pack.questions.toString(),
+        type: 'token_purchase',
+        amount: amount.toString(),
       },
     });
 
