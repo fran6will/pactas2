@@ -102,18 +102,13 @@ function AppRoutes() {
 }
 
 function App() {
-  console.log("App rendering");
   return (
     <Router>
       <UserProvider>
         <div className="min-h-screen bg-gray-50">
           <Layout>
             <div className="container mx-auto px-4">
-              <Routes>
-                {console.log("Routes rendering")}
-                <Route path="/success" element={<PaymentSuccessPage />} />
-                {/* autres routes... */}
-              </Routes>
+              <AppRoutes />
             </div>
           </Layout>
         </div>
@@ -121,6 +116,4 @@ function App() {
     </Router>
   );
 }
-
-export default App;  // Assurez-vous que cette ligne est présente
-
+export default App; 

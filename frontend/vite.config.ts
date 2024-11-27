@@ -5,7 +5,6 @@ import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 
 export default defineConfig({
-  root: '.', 
   plugins: [react()],
   css: {
     postcss: {
@@ -22,22 +21,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    rollupOptions: {
-      input: {
-        app: './index.html' 
-      }
-    }  // <-- Cette accolade manquait
+    sourcemap: true
   },
   server: {
-    port: 5173,
-    strictPort: true,
-    historyApiFallback: true,
-  },
-  preview: {
-    port: 5173,
-    strictPort: true,
     historyApiFallback: true
-  },
-  base: '/'
+  }
 })
