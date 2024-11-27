@@ -242,10 +242,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// Catch-all pour servir React
-app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
-});
 
 // Démarrage du serveur
 httpServer.listen(PORT, () => {
