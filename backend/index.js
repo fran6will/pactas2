@@ -7,6 +7,7 @@ const { PrismaClient } = require('@prisma/client');
 const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
+
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const organizationRoutes = require('./routes/organizations');
@@ -16,84 +17,93 @@ const withdrawalRoutes = require('./routes/withdrawals');
 const userRoutes = require('./routes/users');
 const authenticateUser = require('./middleware/authenticateUser');
 
+
 const app = express();
 const prisma = new PrismaClient();
+app.get('/api/payments/success', (req, res) => {
+  const sessionId = req.query.session_id;
+  const purchaseType = req.query.type;
+
+
+  if (!sessionId) {
+    return res.redirect(`${process.env.FRONTEND_URL}/error`);
+  }
+
+
+  let successUrl;
+  if (purchaseType === 'pack') {
+    successUrl = `${process.env.FRONTEND_URL}/pack-success?session_id=${sessionId}`;
+  } else {
+    successUrl = `${process.env.FRONTEND_URL}/token-success?session_id=${sessionId}`;
+  }
+
+
+  res.redirect(successUrl);
+});
+
+
+
 
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' })); // Webhook Stripe
+
 
 // Configuration WebSocket
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: {
-    origin: ['https://pactas2.onrender.com', 'http://localhost:5173'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  },
+ cors: {
+   origin: ['https://pactas2.onrender.com', 'http://localhost:5173'],
+   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+   allowedHeaders: ['Content-Type', 'Authorization'],
+   credentials: true,
+ },
 });
+
 
 // Ports et Clés
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.SECRET_KEY;
 
+
+
+
+
+
+
+
 // Middlewares globaux
 app.use(cors({
-  origin: ['https://pactas2.onrender.com', 'http://localhost:5173'], 
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
+ origin: ['https://pactas2.onrender.com', 'http://localhost:5173'],
+ methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+ credentials: true,
+ allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+
 
 
 app.use(express.json());
 
+
 // In index.js
 
-// Specific success route handler
-app.get('/api/payments/success', (req, res) => {
-  const sessionId = req.query.session_id;
-  const type = req.query.type;
 
-  if (!sessionId) {
-    console.log('No session ID provided');
-    return res.redirect(`${frontendUrl}/error`);
-  }
 
-  console.log(`Processing success redirect for ${type} purchase with session ${sessionId}`);
-  
-  if (type === 'pack') {
-    return res.redirect(`${frontendUrl}/pack-success?session_id=${sessionId}`);
-  }
-  return res.redirect(`${frontendUrl}/token-success?session_id=${sessionId}`);
-});
 
-// Specific routes for direct frontend access
-app.get('/token-success', (req, res) => {
-  const sessionId = req.query.session_id;
-  res.redirect(`${frontendUrl}/token-success?session_id=${sessionId}`);
-});
-
-app.get('/pack-success', (req, res) => {
-  const sessionId = req.query.session_id;
-  res.redirect(`${frontendUrl}/pack-success?session_id=${sessionId}`);
-});
-// Votre route catch-all existante
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  const targetUrl = `${frontendUrl}${req.path}${req.query ? '?' + new URLSearchParams(req.query).toString() : ''}`;
-  res.redirect(targetUrl);
-});
 // Logs des requêtes
 app.use((req, res, next) => {
-  console.log('Request received:', {
-    method: req.method,
-    path: req.path,
-    body: req.body,
-  });
-  next();
+ console.log('Request received:', {
+   method: req.method,
+   path: req.path,
+   body: req.body,
+ });
+ next();
 });
+
+
+
+
+
+
 
 
 // Routes API
@@ -106,205 +116,236 @@ app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/users', userRoutes);
 
 
+
+
 const frontendUrl = process.env.FRONTEND_URL || 'https://pactas2.onrender.com';
 
 
+
+
+// Catch-all en dernier
 app.get('*', (req, res, next) => {
-  // If the request is for an API route, let it continue to the API handlers
   if (req.path.startsWith('/api/')) {
-      return next();
+    return next();
   }
-  
-  // For all other routes, redirect to the frontend application
-  // This preserves the full path and query parameters
   const targetUrl = `${frontendUrl}${req.path}${req.query ? '?' + new URLSearchParams(req.query).toString() : ''}`;
   res.redirect(targetUrl);
 });
 
+
 // Route pour récupérer toutes les questions
 app.get('/api/questions', async (req, res) => {
-  try {
-    const questions = await prisma.question.findMany({
-      include: {
-        bets: true,
-        organization: true,
-      },
-      where: {
-        status: 'active',
-        deadline: { gt: new Date() },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+ try {
+   const questions = await prisma.question.findMany({
+     include: {
+       bets: true,
+       organization: true,
+     },
+     where: {
+       status: 'active',
+       deadline: { gt: new Date() },
+     },
+     orderBy: {
+       createdAt: 'desc',
+     },
+   });
 
-    const questionsWithTotals = questions.map((question) => {
-      const totalYes = question.bets
-        .filter((bet) => bet.prediction === 'yes')
-        .reduce((sum, bet) => sum + bet.amount, 0);
 
-      const totalNo = question.bets
-        .filter((bet) => bet.prediction === 'no')
-        .reduce((sum, bet) => sum + bet.amount, 0);
+   const questionsWithTotals = questions.map((question) => {
+     const totalYes = question.bets
+       .filter((bet) => bet.prediction === 'yes')
+       .reduce((sum, bet) => sum + bet.amount, 0);
 
-      return {
-        ...question,
-        organization: question.organization.name,
-        totalYes,
-        totalNo,
-        totalPool: totalYes + totalNo,
-      };
-    });
 
-    res.json(questionsWithTotals);
-  } catch (error) {
-    console.error('Error fetching questions:', error);
-    res.status(500).json({ error: 'Erreur serveur lors de la récupération des questions.' });
-  }
+     const totalNo = question.bets
+       .filter((bet) => bet.prediction === 'no')
+       .reduce((sum, bet) => sum + bet.amount, 0);
+
+
+     return {
+       ...question,
+       organization: question.organization.name,
+       totalYes,
+       totalNo,
+       totalPool: totalYes + totalNo,
+     };
+   });
+
+
+   res.json(questionsWithTotals);
+ } catch (error) {
+   console.error('Error fetching questions:', error);
+   res.status(500).json({ error: 'Erreur serveur lors de la récupération des questions.' });
+ }
 });
 // Route pour obtenir une question par ID
 app.get('/api/questions/:id', async (req, res) => {
-  try {
-    const question = await prisma.question.findUnique({
-      where: { id: req.params.id },
-      include: { bets: true, organization: true },
-    });
+ try {
+   const question = await prisma.question.findUnique({
+     where: { id: req.params.id },
+     include: { bets: true, organization: true },
+   });
 
-    if (!question) {
-      return res.status(404).json({ error: 'Question non trouvée' });
-    }
 
-    const totalYes = question.bets.filter(bet => bet.prediction === 'yes')
-      .reduce((sum, bet) => sum + bet.amount, 0);
-    const totalNo = question.bets.filter(bet => bet.prediction === 'no')
-      .reduce((sum, bet) => sum + bet.amount, 0);
+   if (!question) {
+     return res.status(404).json({ error: 'Question non trouvée' });
+   }
 
-    res.json({
-      ...question,
-      organization: question.organization.name,
-      totalYes,
-      totalNo,
-      totalPool: totalYes + totalNo,
-    });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
+
+   const totalYes = question.bets.filter(bet => bet.prediction === 'yes')
+     .reduce((sum, bet) => sum + bet.amount, 0);
+   const totalNo = question.bets.filter(bet => bet.prediction === 'no')
+     .reduce((sum, bet) => sum + bet.amount, 0);
+
+
+   res.json({
+     ...question,
+     organization: question.organization.name,
+     totalYes,
+     totalNo,
+     totalPool: totalYes + totalNo,
+   });
+ } catch (error) {
+   console.error('Error:', error);
+   res.status(500).json({ error: 'Erreur serveur' });
+ }
 });
+
 
 // Route pour placer une mise
 const validateBet = [
-  body('questionId').notEmpty(),
-  body('amount').isFloat({ min: 1 }),
-  body('prediction').isIn(['yes', 'no']),
+ body('questionId').notEmpty(),
+ body('amount').isFloat({ min: 1 }),
+ body('prediction').isIn(['yes', 'no']),
 ];
 
+
 app.post('/api/bets', authenticateUser, validateBet, async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+ const errors = validationResult(req);
+ if (!errors.isEmpty()) {
+   return res.status(400).json({ errors: errors.array() });
+ }
 
-  const { questionId, amount, prediction } = req.body;
 
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      const question = await prisma.question.findFirst({
-        where: { id: questionId, status: 'active', deadline: { gt: new Date() } },
-      });
+ const { questionId, amount, prediction } = req.body;
 
-      if (!question) {
-        throw new Error('Question non trouvée ou inactive');
-      }
 
-      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+ try {
+   const result = await prisma.$transaction(async (prisma) => {
+     const question = await prisma.question.findFirst({
+       where: { id: questionId, status: 'active', deadline: { gt: new Date() } },
+     });
 
-      if (!user || user.tokens < amount) {
-        throw new Error('Solde insuffisant');
-      }
 
-      const bet = await prisma.bet.create({
-        data: { userId: req.user.id, questionId, amount, prediction },
-      });
+     if (!question) {
+       throw new Error('Question non trouvée ou inactive');
+     }
 
-      await prisma.user.update({
-        where: { id: req.user.id },
-        data: { tokens: { decrement: amount } },
-      });
 
-      await prisma.transaction.create({
-        data: { userId: req.user.id, amount: -amount, type: 'bet', questionId },
-      });
+     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
 
-      return bet;
-    });
 
-    const totals = await prisma.bet.groupBy({
-      by: ['prediction'],
-      where: { questionId },
-      _sum: { amount: true },
-    });
+     if (!user || user.tokens < amount) {
+       throw new Error('Solde insuffisant');
+     }
 
-    io.emit(`question:${questionId}:update`, totals);
-    res.json(result);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(400).json({ 
-      error: error.message || 'Erreur lors du placement de la mise',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-    });
-  }
+
+     const bet = await prisma.bet.create({
+       data: { userId: req.user.id, questionId, amount, prediction },
+     });
+
+
+     await prisma.user.update({
+       where: { id: req.user.id },
+       data: { tokens: { decrement: amount } },
+     });
+
+
+     await prisma.transaction.create({
+       data: { userId: req.user.id, amount: -amount, type: 'bet', questionId },
+     });
+
+
+     return bet;
+   });
+
+
+   const totals = await prisma.bet.groupBy({
+     by: ['prediction'],
+     where: { questionId },
+     _sum: { amount: true },
+   });
+
+
+   io.emit(`question:${questionId}:update`, totals);
+   res.json(result);
+ } catch (error) {
+   console.error('Error:', error);
+   res.status(400).json({
+     error: error.message || 'Erreur lors du placement de la mise',
+     details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+   });
+ }
 });
+
 
 // Route pour obtenir les transactions d'un utilisateur
 app.get('/api/transactions/:userId', authenticateUser, async (req, res) => {
-  try {
-    if (req.user.id !== req.params.userId) {
-      return res.status(403).json({ error: 'Non autorisé' });
-    }
+ try {
+   if (req.user.id !== req.params.userId) {
+     return res.status(403).json({ error: 'Non autorisé' });
+   }
 
-    const transactions = await prisma.transaction.findMany({
-      where: { userId: req.user.id },
-      orderBy: { createdAt: 'desc' },
-    });
 
-    res.json(transactions);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
+   const transactions = await prisma.transaction.findMany({
+     where: { userId: req.user.id },
+     orderBy: { createdAt: 'desc' },
+   });
+
+
+   res.json(transactions);
+ } catch (error) {
+   console.error('Error:', error);
+   res.status(500).json({ error: 'Erreur serveur' });
+ }
 });
+
 
 // Gestion des erreurs globales
 app.use((err, req, res, next) => {
-  console.error('Erreur détectée:', err.stack);
-  res.status(500).json({
-    error: 'Une erreur est survenue',
-    details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-  });
+ console.error('Erreur détectée:', err.stack);
+ res.status(500).json({
+   error: 'Une erreur est survenue',
+   details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+ });
 });
+
 
 // WebSocket Events
 io.on('connection', (socket) => {
-  console.log('Nouvelle connexion WebSocket:', socket.id);
+ console.log('Nouvelle connexion WebSocket:', socket.id);
 
-  socket.on('disconnect', () => {
-    console.log('Client déconnecté:', socket.id);
-  });
+
+ socket.on('disconnect', () => {
+   console.log('Client déconnecté:', socket.id);
+ });
 });
+
+
 
 
 // Démarrage du serveur
 httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+ console.log(`Server running on port ${PORT}`);
 });
+
 
 // Gestion propre de la fermeture
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  httpServer.close(() => {
-    console.log('HTTP server closed');
-    prisma.$disconnect();
-    process.exit(0);
-  });
+ console.log('SIGTERM signal received: closing HTTP server');
+ httpServer.close(() => {
+   console.log('HTTP server closed');
+   prisma.$disconnect();
+   process.exit(0);
+ });
 });
