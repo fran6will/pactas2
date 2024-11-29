@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+
 const { Server } = require('socket.io');
 const { createServer } = require('http');
 const { PrismaClient } = require('@prisma/client');
@@ -21,6 +22,14 @@ const authenticateUser = require('./middleware/authenticateUser');
 const app = express();
 const prisma = new PrismaClient();
 
+app.use(express.static(path.join(__dirname, '../dist')));
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  const indexPath = path.join(__dirname, '../dist/index.html');
+  res.sendFile(indexPath);
+});
 
 
 // Webhook doit rester en raw
@@ -63,17 +72,7 @@ app.use(cors({
 app.use(express.json());
 
 
-// REMPLACER par ces routes statiques spécifiques
-app.get('/token-success', (req, res) => {
-  // Build path to your React app's index.html
-  const indexPath = path.join(__dirname, '../dist/index.html');
-  res.sendFile(indexPath);
-});
 
-app.get('/pack-success', (req, res) => {
-  const indexPath = path.join(__dirname, '../dist/index.html');
-  res.sendFile(indexPath);
-});
 
 
 // Logs des requêtes
@@ -109,8 +108,6 @@ const frontendUrl = process.env.FRONTEND_URL || 'https://pactas2.onrender.com';
 
 
 
-// Servir les fichiers statiques
-app.use(express.static(path.join(__dirname, '../dist')));
 
 // Route pour récupérer toutes les questions
 app.get('/api/questions', async (req, res) => {
@@ -328,3 +325,5 @@ process.on('SIGTERM', () => {
    process.exit(0);
  });
 });
+
+

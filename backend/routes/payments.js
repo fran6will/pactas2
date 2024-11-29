@@ -94,7 +94,7 @@ const session = await stripe.checkout.sessions.create({
     quantity: 1,
   }],
   mode: 'payment',
-  success_url: `https://pactas2.onrender.com/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+  success_url: `${process.env.FRONTEND_URL}/dashboard`, // Direct to dashboard
   cancel_url: `https://pactas2.onrender.com/cancel`,
   client_reference_id: req.user.id,
   metadata: {
