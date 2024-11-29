@@ -83,25 +83,25 @@ router.post('/create-payment-session', authenticateUser, async (req, res) => {
    }
 
 
-   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [{
-      price_data: {
-        currency: 'cad',
-        product_data: { name: 'Token Recharge' },
-        unit_amount: amount * 100,
-      },
-      quantity: 1,
-    }],
-    mode: 'payment',
-    success_url: `https://pactas2.onrender.com/dashboard`, // Redirection directe au dashboard
-    cancel_url: `https://pactas2.onrender.com/cancel`,
-    client_reference_id: req.user.id,
-    metadata: {
-      type: 'token_purchase',
-      amount: amount.toString(),
+const session = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  line_items: [{
+    price_data: {
+      currency: 'cad',
+      product_data: { name: 'Token Recharge' },
+      unit_amount: amount * 100,
     },
-  });
+    quantity: 1,
+  }],
+  mode: 'payment',
+  success_url: `https://pactas2.onrender.com/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `https://pactas2.onrender.com/cancel`,
+  client_reference_id: req.user.id,
+  metadata: {
+    type: 'token_purchase',
+    amount: amount.toString(),
+  },
+});
 
     res.status(200).json({ url: session.url });
   } catch (err) {
