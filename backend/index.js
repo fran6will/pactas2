@@ -63,23 +63,17 @@ app.use(cors({
 app.use(express.json());
 
 
+// REMPLACER par ces routes statiques spécifiques
 app.get('/token-success', (req, res) => {
-  const sessionId = req.query.session_id;
-  if (!sessionId) {
-    return res.redirect(`${process.env.FRONTEND_URL}/error`);
-  }
-  res.render('token-success'); // ou envoyer le fichier HTML
+  // Build path to your React app's index.html
+  const indexPath = path.join(__dirname, '../dist/index.html');
+  res.sendFile(indexPath);
 });
 
 app.get('/pack-success', (req, res) => {
-  const sessionId = req.query.session_id;
-  if (!sessionId) {
-    return res.redirect(`${process.env.FRONTEND_URL}/error`);
-  }
-  res.render('pack-success'); // ou envoyer le fichier HTML
+  const indexPath = path.join(__dirname, '../dist/index.html');
+  res.sendFile(indexPath);
 });
-
-
 
 
 // Logs des requêtes
@@ -115,16 +109,8 @@ const frontendUrl = process.env.FRONTEND_URL || 'https://pactas2.onrender.com';
 
 
 
-
-// Catch-all en dernier
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  const targetUrl = `${frontendUrl}${req.path}${req.query ? '?' + new URLSearchParams(req.query).toString() : ''}`;
-  res.redirect(targetUrl);
-});
-
+// Servir les fichiers statiques
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Route pour récupérer toutes les questions
 app.get('/api/questions', async (req, res) => {
