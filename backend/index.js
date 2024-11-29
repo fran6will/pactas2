@@ -20,32 +20,11 @@ const authenticateUser = require('./middleware/authenticateUser');
 
 const app = express();
 const prisma = new PrismaClient();
-app.get('/api/payments/success', (req, res) => {
-  const sessionId = req.query.session_id;
-  const purchaseType = req.query.type;
-
-
-  if (!sessionId) {
-    return res.redirect(`${process.env.FRONTEND_URL}/error`);
-  }
-
-
-  let successUrl;
-  if (purchaseType === 'pack') {
-    successUrl = `${process.env.FRONTEND_URL}/pack-success?session_id=${sessionId}`;
-  } else {
-    successUrl = `${process.env.FRONTEND_URL}/token-success?session_id=${sessionId}`;
-  }
-
-
-  res.redirect(successUrl);
-});
 
 
 
-
-app.use('/api/payments/webhook', express.raw({ type: 'application/json' })); // Webhook Stripe
-
+// Webhook doit rester en raw
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 // Configuration WebSocket
 const httpServer = createServer(app);
@@ -84,7 +63,21 @@ app.use(cors({
 app.use(express.json());
 
 
-// In index.js
+app.get('/token-success', (req, res) => {
+  const sessionId = req.query.session_id;
+  if (!sessionId) {
+    return res.redirect(`${process.env.FRONTEND_URL}/error`);
+  }
+  res.render('token-success'); // ou envoyer le fichier HTML
+});
+
+app.get('/pack-success', (req, res) => {
+  const sessionId = req.query.session_id;
+  if (!sessionId) {
+    return res.redirect(`${process.env.FRONTEND_URL}/error`);
+  }
+  res.render('pack-success'); // ou envoyer le fichier HTML
+});
 
 
 
