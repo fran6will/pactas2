@@ -30,31 +30,30 @@ export const authService = {
   async login(email: string, password: string): Promise<AuthResponse> {
     try {
       const data = await api.post('/auth/login', { email, password });
-      
       if (data.token) {
-        localStorage.setItem('auth_token', data.token);
+        api.setToken(data.token);
       }
-      
       return data;
     } catch (error: any) {
-      throw new Error(error.message || 'Erreur lors de la connexion');
+      throw new Error(error.message || 'Login failed');
     }
   },
 
-  async register(registerData: RegisterData): Promise<AuthResponse> {
+  async register(data: { 
+    email: string; 
+    password: string; 
+    name: string; 
+    userType?: 'user' | 'organization';
+    description?: string; 
+  }): Promise<AuthResponse> {
     try {
-      const data = await api.post('/auth/register', registerData);
-      
-      if (data.token) {
-        localStorage.setItem('auth_token', data.token);
+      const response = await api.post('/auth/register', data);
+      if (response.token) {
+        api.setToken(response.token);
       }
-      
-      return data;
+      return response;
     } catch (error: any) {
-      if (error.response?.data?.error) {
-        throw new Error(error.response.data.error);
-      }
-      throw new Error('Erreur lors de l\'inscription');
+      throw new Error(error.message || 'Registration failed');
     }
   },
 
