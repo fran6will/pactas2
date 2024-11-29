@@ -5,6 +5,7 @@ import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 
 export default defineConfig({
+  base: '/',
   plugins: [react()],
   css: {
     postcss: {
@@ -23,7 +24,13 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true
   },
-  server: {
-    historyApiFallback: true
+  sserver: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 })
