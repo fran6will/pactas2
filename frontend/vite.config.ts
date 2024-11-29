@@ -24,7 +24,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true
   },
-  sserver: {
+  server: {
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
