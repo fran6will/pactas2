@@ -11,7 +11,6 @@ import DashboardPage from './pages/DashboardPage';
 import QuestionPage from './pages/QuestionPage';
 import OrganizationDashboard from './pages/OrganizationDashboard';
 import OrganizationPublicPage from './pages/OrganizationPublicPage';
-import SuccessPage from './pages/SuccessPage';
 import PaymentCancelPage from './pages/CancelPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
 import AdminPage from './pages/AdminPage';
