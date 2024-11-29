@@ -282,7 +282,6 @@ app.get('/api/transactions/:userId', authenticateUser, async (req, res) => {
 });
 
 
-app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 
 app.get('*', (req, res) => {
