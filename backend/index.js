@@ -97,7 +97,6 @@ app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/users', userRoutes);
 
 
-app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 
 const frontendUrl = process.env.FRONTEND_URL || 'https://pactas2.onrender.com';
@@ -281,6 +280,10 @@ app.get('/api/transactions/:userId', authenticateUser, async (req, res) => {
    res.status(500).json({ error: 'Erreur serveur' });
  }
 });
+
+
+app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
+
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
