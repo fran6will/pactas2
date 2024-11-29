@@ -34,7 +34,7 @@ app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
  cors: {
-   origin: ['https://pactas2.onrender.com','https://pactas2.vercel.app/', 'http://localhost:5173'],
+   origin: ['https://pactas2.onrender.com','https://pactas2.vercel.app/','https://pactas2-hnif7v4tj-fran6wills-projects.vercel.app', 'http://localhost:5173'],
    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
    allowedHeaders: ['Content-Type', 'Authorization'],
    credentials: true,
@@ -55,7 +55,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 // Middlewares globaux
 app.use(cors({
- origin: ['https://pactas2.onrender.com', 'https://pactas2.vercel.app/', 'http://localhost:5173'],
+ origin: ['https://pactas2.onrender.com', 'https://pactas2.vercel.app/', 'https://pactas2-hnif7v4tj-fran6wills-projects.vercel.app', 'http://localhost:5173'],
  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
  credentials: true,
  allowedHeaders: ['Content-Type', 'Authorization'],
