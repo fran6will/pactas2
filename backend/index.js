@@ -284,9 +284,7 @@ app.get('/api/transactions/:userId', authenticateUser, async (req, res) => {
 
 
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
-});
+
 // Gestion des erreurs globales
 app.use((err, req, res, next) => {
  console.error('Erreur détectée:', err.stack);
