@@ -23,7 +23,6 @@ const app = express();
 const prisma = new PrismaClient();
 
 // Serve static files from the React app's build directory
-app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 
 
@@ -98,6 +97,7 @@ app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/users', userRoutes);
 
 
+app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 
 const frontendUrl = process.env.FRONTEND_URL || 'https://pactas2.onrender.com';
